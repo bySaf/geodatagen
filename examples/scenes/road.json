@@ -1,0 +1,118 @@
+{
+  "seed": 20261312,
+  "grid": {
+    "domain": [
+      7.0,
+      4.8,
+      1.2
+    ],
+    "dx": 0.02,
+    "solver_dx": 0.01,
+    "surface_z": 0.9,
+    "time_window": 3.2e-08,
+    "threads": 2,
+    "pml_thickness": 0.12,
+    "frequency": 600000000.0
+  },
+  "preset": {
+    "name": "road",
+    "layers": [
+      {
+        "thickness": 0.08,
+        "er": 6,
+        "sigma": 0.001
+      },
+      {
+        "thickness": 0.2,
+        "er": 7,
+        "sigma": 0.002
+      },
+      {
+        "thickness": 0.62,
+        "sand": 0.45,
+        "clay": 0.25,
+        "bulk_density": 1.7,
+        "water_min": 0.14,
+        "water_max": 0.22,
+        "custom": {
+          "water_conductivity_s_m": 0.12,
+          "porosity_sd": 0.01,
+          "grain_permittivity": 4.5,
+          "archie_a": 1.0,
+          "archie_m": 1.5,
+          "archie_n": 2.0,
+          "surface_conductivity_s_m": 0.0005,
+          "correlation_m": [
+            0.1,
+            0.1,
+            0.035
+          ],
+          "roughness_rms_m": 0.008,
+          "roughness_corr_m": [
+            0.15,
+            0.12
+          ]
+        }
+      }
+    ],
+    "custom_field": {
+      "bins_epsilon": 5,
+      "bins_log_sigma": 5,
+      "water_epsilon_r": 80.0,
+      "max_fft_cells": 50000000
+    }
+  },
+  "source": {
+    "waveform": "gaussiandotnorm",
+    "frequency_hz": 600000000.0,
+    "moment_Am": 0.02,
+    "height_m": 0.02,
+    "tx_rx_offset_m": 0.1
+  },
+  "sfcw": {
+    "fmin_hz": 400000000.0,
+    "fmax_hz": 900000000.0,
+    "df_hz": 5000000.0
+  },
+  "assumptions": {
+    "scenario": "Full synthetic road preset, migrated to scene schema 2; layer parameters are declared model assumptions."
+  },
+  "objects": [
+    {
+      "type": "metal",
+      "center_m": [
+        2.0,
+        1.0,
+        0.5
+      ],
+      "radius_m": 0.06
+    },
+    {
+      "type": "air",
+      "center_m": [
+        3.5,
+        1.6,
+        0.4
+      ],
+      "radius_m": 0.07
+    },
+    {
+      "type": "dielectric",
+      "center_m": [
+        5.0,
+        1.9,
+        0.45
+      ],
+      "radius_m": 0.08
+    }
+  ],
+  "schema_version": 2,
+  "generator": "custom_crim_archie",
+  "simulation": {
+    "mode": "moving_window",
+    "window_xy": [
+      1.2,
+      1.2
+    ]
+  }
+}

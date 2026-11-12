@@ -37,7 +37,7 @@ FORBIDDEN_NAMES = {
     "soil_golfcourse_measured_context.png",
 }
 REQUIRED = [
-    "index.html", "guide.html", "park-pilot.json", "HOW-TO.txt", "ATTRIBUTION.txt", "GPL-3.0.txt",
+    "index.html", "guide.html", "park-pilot.json", "ATTRIBUTION.txt", "GPL-3.0.txt",
     "soil_three_way.png", "bscan_three_way.png", "source_and_ascans.png", "pilot_route.png",
     "spectra_three_way.png", "target_checks.png",
     "comparison_metrics.json", "soil_comparison_metrics.json", "material_validation.json",
@@ -274,7 +274,7 @@ def main() -> None:
     files = collect_files()
     # The GitBook-style home embeds all figures and uses shared offline assets.
     site_files = []
-    for folder in ('assets', 'sections', 'route', 'objects'):
+    for folder in ('assets', 'sections', 'route', 'objects', 'scenes'):
         site_files.extend(p for p in (SOURCE.parent/folder).iterdir()
                           if p.is_file() and p.suffix in {'.png', '.html', '.css', '.js', '.csv', '.json', '.txt'})
     site_files.append(SOURCE.parent/'soil_modes/soil_modes_comparison.png')
@@ -287,7 +287,7 @@ def main() -> None:
 Собран: {generated_at}
 
 Откройте index.html в браузере после распаковки всей папки: это главная
-страница документации проекта. Краткая инструкция — в realism/.
+страница документации проекта с инструкциями и примерами.
 В комплекте: русский отчёт, рисунки, конфигурация, метрики, два завершённых
 профиля по 29 трасс, эффективные частотные результаты и исходные сцены.
 Оба HDF5 проверены: 29/29 complete; трассы конечны и не являются нулевыми.

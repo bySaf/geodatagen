@@ -1,12 +1,5 @@
-<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Инструкция GeoDataGen</title><link rel="stylesheet" href="../assets/book.css"><script src="../assets/book.js" defer></script></head><body><header class="topbar"><a class="brand" href="../index.html">GeoDataGen</a><div class="toplinks"><a href="../index.html">Главная документация</a><a href="https://github.com/bySaf/geodatagen">GitHub</a></div></header><main class="book" style="margin-left:auto;margin-right:auto;max-width:1000px"><div class="article-header"><div class="breadcrumb"><a href="../index.html">Документация</a> / Краткий справочник</div><h1>Как работать с проектом</h1><p>Краткая последовательность установки, расчёта и просмотра результатов.</p></div>
-<section class="article-section" id="start"><h2>Установка</h2><pre data-copy><code>git clone https://github.com/bySaf/geodatagen.git
-cd geodatagen
-bash scripts/setup.sh
-source .venv/bin/activate</code></pre><p>Нужен Python 3.12 или 3.13. Поддерживаемый путь: macOS/Linux, в Windows — WSL2.</p></section>
-<section class="article-section" id="experiment"><h2>Создать отдельный эксперимент</h2><pre data-copy><code>python geodatagen.py init park-demo --mode custom_crim_archie
-python geodatagen.py run park-demo --limit 1
-python geodatagen.py plot park-demo
-python geodatagen.py docs park-demo</code></pre><p>Результаты — в <code>experiments/park-demo/</code>. Для расчёта полного маршрута используется <code>run</code> без <code>--limit 1</code>. <a href="../index.html#commands">Все команды →</a></p></section>
-<section class="article-section" id="objects"><h2>Настроить сцену</h2><ul><li><a href="../index.html#objects">Добавить объекты и задать координаты</a>.</li><li id="soil"><a href="../index.html#settings-soil">Выбрать грунт, влажность и слои</a>.</li><li id="source"><a href="../index.html#source">Изменить источник и маршрут</a>.</li><li id="full"><a href="../index.html#full">Три большие сцены и случайная расстановка</a>.</li></ul></section>
-<section class="article-section" id="files"><h2>Открыть геометрию</h2><pre data-copy><code>python geodatagen.py export park-demo</code></pre><p>В ParaView: File → Open → <code>experiments/park-demo/scene/scene.vti</code> → Apply. Разрез создаётся фильтром Slice. <a href="../index.html#paraview">Подробная инструкция с координатами разрезов →</a></p></section>
-<section class="article-section" id="questions"><h2>Результаты и ответы</h2><ul><li><a href="../index.html#soil">Разрезы и все графики</a>.</li><li><a href="../index.html#questions">Частые вопросы</a>.</li></ul></section><footer class="footer"><a href="../index.html">Вернуться к полной документации</a><span>GeoDataGen</span></footer></main></body></html>
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>GeoDataGen — документация</title><meta http-equiv="refresh" content="0; url=../index.html#start"></head>
+<body><p>Руководство находится на <a href="../index.html#start">главной странице документации</a>.</p>
+<script>const anchors = {"start": "start", "objects": "objects", "soil": "settings-soil", "source": "source", "full": "scene", "files": "paraview", "questions": "start"}; location.replace('../index.html#' + (anchors[location.hash.slice(1)] || 'start'));</script>
+</body></html>

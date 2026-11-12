@@ -1,0 +1,107 @@
+{
+  "seed": 20261212,
+  "grid": {
+    "domain": [
+      7.0,
+      4.8,
+      1.2
+    ],
+    "dx": 0.02,
+    "solver_dx": 0.01,
+    "surface_z": 0.9,
+    "time_window": 3.2e-08,
+    "threads": 2,
+    "pml_thickness": 0.12,
+    "frequency": 600000000.0
+  },
+  "preset": {
+    "name": "field",
+    "layers": [
+      {
+        "thickness": 0.26,
+        "sand": 0.6,
+        "clay": 0.15,
+        "bulk_density": 1.4,
+        "water_min": 0.06,
+        "water_max": 0.12,
+        "custom": {
+          "water_conductivity_s_m": 0.12,
+          "porosity_sd": 0.01,
+          "grain_permittivity": 4.5,
+          "archie_a": 1.0,
+          "archie_m": 1.5,
+          "archie_n": 2.0,
+          "surface_conductivity_s_m": 0.0005,
+          "correlation_m": [
+            0.1,
+            0.1,
+            0.035
+          ],
+          "roughness_rms_m": 0.008,
+          "roughness_corr_m": [
+            0.15,
+            0.12
+          ]
+        }
+      },
+      {
+        "thickness": 0.64,
+        "sand": 0.6,
+        "clay": 0.15,
+        "bulk_density": 1.6,
+        "water_min": 0.09,
+        "water_max": 0.16,
+        "custom": {
+          "water_conductivity_s_m": 0.12,
+          "porosity_sd": 0.01,
+          "grain_permittivity": 4.5,
+          "archie_a": 1.0,
+          "archie_m": 1.5,
+          "archie_n": 2.0,
+          "surface_conductivity_s_m": 0.0005,
+          "correlation_m": [
+            0.1,
+            0.1,
+            0.035
+          ],
+          "roughness_rms_m": 0.008,
+          "roughness_corr_m": [
+            0.15,
+            0.12
+          ]
+        }
+      }
+    ],
+    "custom_field": {
+      "bins_epsilon": 5,
+      "bins_log_sigma": 5,
+      "water_epsilon_r": 80.0,
+      "max_fft_cells": 50000000
+    }
+  },
+  "source": {
+    "waveform": "gaussiandotnorm",
+    "frequency_hz": 600000000.0,
+    "moment_Am": 0.02,
+    "height_m": 0.02,
+    "tx_rx_offset_m": 0.1
+  },
+  "sfcw": {
+    "fmin_hz": 400000000.0,
+    "fmax_hz": 900000000.0,
+    "df_hz": 5000000.0
+  },
+  "assumptions": {
+    "scenario": "Full synthetic field preset, migrated to scene schema 2; layer parameters are declared model assumptions."
+  },
+  "objects": [],
+  "schema_version": 2,
+  "generator": "custom_crim_archie",
+  "simulation": {
+    "mode": "moving_window",
+    "window_xy": [
+      1.2,
+      1.2
+    ]
+  }
+}

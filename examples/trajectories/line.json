@@ -1,0 +1,7 @@
+{
+  "name": "full_line",
+  "type": "line",
+  "start": [1.0, 1.0],
+  "end": [5.0, 1.0],
+  "step_m": 0.05
+}

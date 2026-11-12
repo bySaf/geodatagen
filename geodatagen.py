@@ -90,8 +90,11 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description='Geodatagen: отдельная папка на каждый эксперимент.')
     subs = parser.add_subparsers(dest='command', required=True)
     init = subs.add_parser('init', help='Подготовить сцену, ParaView и страницу эксперимента')
-    init.add_argument('name'); init.add_argument('--mode', choices=MODES, default='custom_crim_archie')
-    init.add_argument('--config', type=Path, default=ROOT / 'examples' / 'park-objects.json')
+    init.add_argument('name'); init.add_argument('--mode', choices=MODES, help='Переопределить генератор, выбранный в файле сцены')
+    scene_input = init.add_mutually_exclusive_group()
+    scene_input.add_argument('--scene', type=Path, help='JSON сцены: грунт, объекты, источник и область расчёта')
+    scene_input.add_argument('--config', type=Path, help='Совместимость с прежним JSON сцены и прямого профиля')
+    init.add_argument('--trajectory', type=Path, help='JSON маршрута: прямая, змейка, точки или CSV')
     run = subs.add_parser('run', help='Рассчитать или продолжить маршрут; графики обновятся автоматически')
     run.add_argument('name'); run.add_argument('--limit', type=int); run.add_argument('--resume', action='store_true', help='Удалить локальный STOP и продолжить')
     for command, help_text in [('status', 'Показать прогресс'), ('plot', 'Обновить графики и отчёт'), ('export', 'Обновить VTI для ParaView и отчёт'), ('stop', 'Остановиться после текущей трассы')]:
@@ -107,14 +110,31 @@ def main(argv=None):
         return 0
     directory = experiment_path(args.name)
     if args.command == 'init':
-        source = args.config.resolve()
+        source = (args.scene or args.config or ROOT / 'examples' / 'scenes' / 'park-pilot.json').resolve()
         if not source.is_file():raise ValueError(f'Не найден JSON: {source}')
         if directory.exists():raise ValueError('Это имя уже занято. Для нового опыта выберите новое имя; run продолжает прежний.')
         # Capture the input before invoking preparation; a subsequent edit must
         # not replace the exact input which created this experiment.
-        original = source.read_text(); json.loads(original)
-        invoke(directory, 'prepare', ['--config', str(source), '--mode', args.mode])
+        original = source.read_text(); raw = json.loads(original)
+        route = args.trajectory
+        if route is None and args.scene is None and args.config is None:
+            route = ROOT / 'examples' / 'trajectories' / 'pilot-line.json'
+        if route is None and 'profile' not in raw and 'trajectory' not in raw:
+            raise ValueError('Укажите --trajectory examples/trajectories/snake.json вместе с файлом сцены.')
+        options = ['--config', str(source)]
+        if args.mode:options += ['--mode', args.mode]
+        if route is not None:
+            route = route.resolve()
+            if not route.is_file():raise ValueError(f'Не найден маршрут: {route}')
+            options += ['--trajectory', str(route)]
+        invoke(directory, 'prepare', options)
         (directory / 'source.json').write_text(original)
+        (directory / 'scene_config.json').write_text(original)
+        resolved = json.loads((directory / 'config.json').read_text())
+        if 'trajectory' in resolved:
+            # CSV paths have been expanded into coordinates: the experiment
+            # remains reproducible after the user's original CSV is moved.
+            (directory / 'trajectory_config.json').write_text(json.dumps(resolved['trajectory'], indent=2, ensure_ascii=False) + '\n')
         refresh(directory, export=True)
     else:
         if not (directory / 'config.json').is_file():raise ValueError('Эксперимент не подготовлен. Сначала выполните init.')

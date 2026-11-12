@@ -88,6 +88,14 @@ def write_vti(path, fields, spacing, frequency):
     temp.replace(path)
 
 
+def representative_y(directory, cfg):
+    archive = Path(directory) / 'positions.npz'
+    if archive.exists():
+        with np.load(archive, allow_pickle=False) as positions:
+            return float(np.median(positions['tx_m'][:, 1]))
+    return float(cfg.get('profile', {}).get('y_m', cfg['grid']['domain'][1]/2))
+
+
 def export_geometry(directory):
     import matplotlib
     matplotlib.use('Agg')
@@ -106,7 +114,8 @@ def export_geometry(directory):
         'coordinates': 'metres; Z upward; depth = surface_z - Z',
         'surface_z_m': cfg['grid']['surface_z'],
     }, indent=2, ensure_ascii=False) + '\n')
-    j = min(fields['epsilon_real'].shape[1] - 1, int(cfg['profile']['y_m'] / spacing[1]))
+    slice_y = representative_y(directory, cfg)
+    j = max(0, min(fields['epsilon_real'].shape[1] - 1, int(slice_y / spacing[1])))
     cut = fields['epsilon_real'][:, j, :]
     g = cfg['grid']
     fig, ax = plt.subplots(figsize=(11, 5), layout='constrained')
@@ -122,9 +131,10 @@ def export_geometry(directory):
 2. Нажмите Apply. При необходимости Reset Camera.
 3. В поле Coloring выберите epsilon_real и Rescale to Data Range.
 4. Для вертикального разреза: Filters → Slice, тип Plane.
-   Origin: {g['domain'][0]/2:g}, {cfg['profile']['y_m']:g}, {g['surface_z']/2:g}.
+   Origin: {g['domain'][0]/2:g}, {slice_y:g}, {g['surface_z']/2:g}.
    Normal: 0, 1, 0. Нажмите Apply; скройте исходный объём значком глаза.
-5. Для просмотра поперёк профиля направьте камеру вдоль оси Y.
+5. Этот разрез выбран по медиане Y всех Tx; он не повторяет повороты маршрутов.
+   Меняйте Origin и Normal для других разрезов сцены.
 6. Для объектов выберите Coloring → object_type:
    0 = фон, 1 = металл, 2 = воздушная полость, 3 = диэлектрик.
    Можно применить Threshold к object_type с диапазоном от 1 до 3.
@@ -149,6 +159,15 @@ def report(directory, status):
     directory = Path(directory)
     cfg = json.loads((directory / 'config.json').read_text())
     name = escape(directory.name)
+    slice_y = representative_y(directory, cfg)
+    mode = cfg.get('simulation', {}).get('mode', 'fixed')
+    scene_size = ' × '.join(f'{v:g}' for v in cfg['grid']['domain'])
+    route_summary = ''
+    archive = directory / 'positions.npz'
+    if archive.exists():
+        with np.load(archive, allow_pickle=False) as positions:
+            route_count = len(np.unique(positions['route_id'])) if 'route_id' in positions else 1
+            route_summary = f' · маршрутов: {route_count}'
     (directory / 'status.json').write_text(json.dumps(status, indent=2, ensure_ascii=False) + '\n')
     done = status.get('completed', 0)
     total = status.get('total', cfg['profile']['n'])
@@ -158,9 +177,14 @@ def report(directory, status):
     for filename, caption in [('scene_layout.png', 'Маршрут Tx/Rx и размещение объектов'), ('soil_slice.png', 'Разрез фактической геометрии сцены'), ('bscan.png', 'B-скан: рассчитанные позиции; серые столбцы ещё не готовы'), ('ascan.png', 'A-скан в одной рассчитанной позиции')]:
         if (directory / filename).exists():
             figures.append(f'<figure><img src="{filename}" alt="{caption}" loading="lazy"><figcaption>{caption}</figcaption></figure>')
+    for path in sorted(directory.glob('bscan_[0-9][0-9][0-9].png')):
+        caption = 'B-сканы следующих маршрутов; пунктир — смена сегмента'
+        figures.append(f'<figure><img src="{path.name}" alt="{caption}" loading="lazy"><figcaption>{caption}</figcaption></figure>')
     entries = [
         ('source.json', 'Исходные настройки'), ('config.json', 'Зафиксированные настройки и версии'),
-        ('objects.json', 'Объекты и координаты'), ('positions.npz', 'Положения Tx/Rx'),
+        ('scene_config.json', 'Исходные настройки сцены'), ('trajectory_config.json', 'Исходное описание маршрутов'),
+        ('objects.json', 'Объекты и координаты'), ('positions.npz', 'Зафиксированные положения Tx/Rx'),
+        ('trajectory.csv', 'Маршруты: заданные и округлённые координаты, путь и сегменты'),
         ('scene/scene.vti', 'Геометрия ParaView'), ('scene/scene.in', 'Сцена gprMax'),
         ('scene/vti_fields.json', 'Описание полей ParaView'), ('bscan.h5', 'Численные сигналы'),
         ('effective_sfcw.npz', 'Синтетический частотный отклик'), ('status.json', 'Состояние при обновлении'),
@@ -169,10 +193,10 @@ def report(directory, status):
     links = ''.join(f'<li><a href="{file}">{title}</a> <code>{file}</code></li>' for file, title in entries if (directory / file).exists())
     commands = '\n'.join(f'python geodatagen.py {command} {directory.name}' for command in ('run', 'status', 'plot', 'export', 'docs'))
     text = f'''<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{name} · Geodatagen</title>
-<style>:root{{color-scheme:light}}*{{box-sizing:border-box}}body{{margin:0;font:16px/1.65 system-ui,sans-serif;color:#1c2633;background:#fff}}header,main,footer{{max-width:1100px;margin:auto;padding:24px}}header{{border-bottom:1px solid #e5e7eb}}h1{{font-size:34px;margin:8px 0}}h2{{margin-top:40px}}a{{color:#126a58}}code,pre{{font-family:ui-monospace,monospace;font-size:14px}}pre{{background:#f4f6f7;padding:20px;overflow-x:auto;border:1px solid #e4e8ec;border-radius:8px}}figure{{margin:28px 0}}img{{display:block;width:100%;height:auto}}figcaption,footer,.muted{{color:#596674;font-size:14px}}li{{margin:9px 0}}li code{{margin-left:12px}}.status{{display:inline-block;padding:4px 12px;background:#edf6f2;border-radius:6px}}@media(max-width:600px){{header,main,footer{{padding:18px}}h1{{font-size:28px}}li code{{display:block;margin:0}}}}</style></head><body><header><p class="muted">Geodatagen / Эксперимент</p><h1>{name}</h1><p><span class="status">{label} · {done}/{total} трасс</span></p><p>Модель грунта: <code>{escape(cfg['generator'])}</code> · seed {cfg['seed']}</p></header><main>
+<style>:root{{color-scheme:light}}*{{box-sizing:border-box}}body{{margin:0;font:16px/1.65 system-ui,sans-serif;color:#1c2633;background:#fff}}header,main,footer{{max-width:1100px;margin:auto;padding:24px}}header{{border-bottom:1px solid #e5e7eb}}h1{{font-size:34px;margin:8px 0}}h2{{margin-top:40px}}a{{color:#126a58}}code,pre{{font-family:ui-monospace,monospace;font-size:14px}}pre{{background:#f4f6f7;padding:20px;overflow-x:auto;border:1px solid #e4e8ec;border-radius:8px}}figure{{margin:28px 0}}img{{display:block;width:100%;height:auto}}figcaption,footer,.muted{{color:#596674;font-size:14px}}li{{margin:9px 0}}li code{{margin-left:12px}}.status{{display:inline-block;padding:4px 12px;background:#edf6f2;border-radius:6px}}@media(max-width:600px){{header,main,footer{{padding:18px}}h1{{font-size:28px}}li code{{display:block;margin:0}}}}</style></head><body><header><p class="muted">Geodatagen / Эксперимент</p><h1>{name}</h1><p><span class="status">{label} · {done}/{total} трасс</span></p><p>Модель грунта: <code>{escape(cfg['generator'])}</code> · seed {cfg['seed']}</p><p>Сцена: {scene_size} м · расчёт: <code>{escape(mode)}</code>{route_summary}</p></header><main>
 <p>Все материалы этого опыта находятся в одной папке. Отчёт обновляется командами <code>run</code>, <code>plot</code> и <code>export</code>. Во время расчёта актуальный прогресс показывает <code>status</code>.</p>
 {''.join(figures)}<h2>Продолжить работу</h2><p>Выполняйте из корня скачанного репозитория, в активированном окружении:</p><pre>{escape(commands)}</pre><p>Параметры готового опыта зафиксированы. Для изменений создайте новый эксперимент с другим именем и новым JSON.</p>
-<h2>Открыть сцену в ParaView</h2><ol><li>File → Open → <code>scene/scene.vti</code> → Apply.</li><li>Выберите Coloring → <code>epsilon_real</code>, затем Rescale to Data Range.</li><li>Filters → Slice: Normal = <code>0, 1, 0</code>, Origin = <code>{cfg['grid']['domain'][0]/2:g}, {cfg['profile']['y_m']:g}, {cfg['grid']['surface_z']/2:g}</code>. Apply; скройте исходный объём.</li><li>Для объектов выберите поле <code>object_type</code>: 1 — металл, 2 — полость, 3 — диэлектрик.</li></ol><p>Координаты в метрах, Z вверх. Глубина = {cfg['grid']['surface_z']:g} − Z. <a href="PARAVIEW.txt">Подробная инструкция</a>.</p>
+<h2>Открыть сцену в ParaView</h2><ol><li>File → Open → <code>scene/scene.vti</code> → Apply.</li><li>Выберите Coloring → <code>epsilon_real</code>, затем Rescale to Data Range.</li><li>Filters → Slice: Normal = <code>0, 1, 0</code>, Origin = <code>{cfg['grid']['domain'][0]/2:g}, {slice_y:g}, {cfg['grid']['surface_z']/2:g}</code>. Apply; скройте исходный объём.</li><li>Для объектов выберите поле <code>object_type</code>: 1 — металл, 2 — полость, 3 — диэлектрик.</li></ol><p>Разрез проходит по медиане Y всех положений Tx; повороты маршрута показаны на плане. Координаты в метрах, Z вверх. Глубина = {cfg['grid']['surface_z']:g} − Z. <a href="PARAVIEW.txt">Подробная инструкция</a>.</p>
 <h2>Файлы этого опыта</h2><ul>{links}</ul><p class="muted">Синтетический сигнал рассчитан для идеальных Tx/Rx. Частотная обработка не является калибровкой под конкретный реальный прибор.</p></main><footer>Обновлено {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')} · Отчёт открывается без сервера.</footer></body></html>'''
     (directory / 'index.html').write_text(text)
     return directory / 'index.html'

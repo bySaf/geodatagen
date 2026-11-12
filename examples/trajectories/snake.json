@@ -1,0 +1,11 @@
+{
+  "name": "rounded_snake",
+  "type": "snake",
+  "start": [1.0, 1.0],
+  "row_length_m": 4.0,
+  "rows": 4,
+  "row_spacing_m": 0.3,
+  "step_m": 0.05,
+  "turn": "rounded",
+  "heading_deg": 0.0
+}

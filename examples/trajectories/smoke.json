@@ -1,0 +1,6 @@
+{
+  "type": "waypoints",
+  "name": "smoke-turn",
+  "points": [[0.3, 0.3], [0.4, 0.3], [0.4, 0.4]],
+  "step_m": 0.1
+}

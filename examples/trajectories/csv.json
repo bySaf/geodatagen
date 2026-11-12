@@ -1,0 +1,6 @@
+{
+  "name": "csv_waypoints",
+  "type": "csv",
+  "file": "coords.csv",
+  "step_m": 0.05
+}
