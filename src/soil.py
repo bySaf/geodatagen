@@ -6,19 +6,58 @@ import shutil
 import subprocess
 import sys
 import hashlib
+import tempfile
 
 import h5py
 import numpy as np
 
+# g/cm³: sand/mineral particle-density assumption used in the official Peplinski
+# example, not a universal measured soil value. Porosity = 1 - bulk/particle.
+# https://docs.gprmax.com/en/latest/input_hash_cmds.html#soil-peplinski
+# Original constitutive model: Peplinski et al. (1995), doi:10.1109/36.387598.
+from .physical_constants import MINERAL_DENSITY_G_CM3
+
 
 GENERATORS = ('native_peplinski', 'custom_crim_archie')
+
+
+def _geometry_environment():
+    """Share Matplotlib's font cache across scenes and independent processes.
+
+    gprMax imports plotting code even for geometry-only runs. Giving each new
+    scene a fresh MPLCONFIGDIR repeats font discovery. Respect a usable caller
+    setting, then try the project cache and a user-specific temporary cache if
+    the installation is read-only. Matplotlib handles concurrent cache writers.
+    Paths must be absolute because the child process changes its directory.
+    """
+    env = dict(os.environ)
+    candidates = []
+    if env.get('MPLCONFIGDIR'):
+        candidates.append(Path(env['MPLCONFIGDIR']).expanduser().resolve())
+    candidates.extend((Path(__file__).resolve().parents[1] / '.cache/matplotlib',
+                       Path(tempfile.gettempdir()) / f'geodatagen-matplotlib-{os.getuid() if hasattr(os, "getuid") else "user"}'))
+    for candidate in candidates:
+        try:
+            candidate.mkdir(parents=True, exist_ok=True)
+            # Actual write probe also handles ACLs/read-only mounts; os.access
+            # alone cannot establish that the subprocess can create its cache.
+            with tempfile.TemporaryFile(dir=candidate):
+                pass
+        except OSError:
+            continue
+        env['MPLCONFIGDIR'] = str(candidate)
+        return env
+    # Leave fallback handling to Matplotlib if even the temporary directory is
+    # unwritable; this optimization must not introduce a new failure mode.
+    env.pop('MPLCONFIGDIR', None)
+    return env
 
 
 def custom_generator_fingerprint():
     """Version both the provided algorithm and its local geometry adapter."""
     base = Path(__file__).resolve().parent
     digest = hashlib.sha256()
-    for name in ('soil.py', 'supervisor_fields.py'):
+    for name in ('soil.py', 'supervisor_fields.py', 'physical_constants.py'):
         digest.update(name.encode())
         digest.update((base / name).read_bytes())
     return digest.hexdigest()
@@ -44,6 +83,8 @@ def prepare_scene(directory, preset, grid, seed, object_lines=(), generator=None
     if not 0 < surface < domain[2]:
         raise ValueError('Soil surface must be inside domain')
     fmt = lambda xyz: ' '.join(f'{v:.9g}' for v in xyz)
+    # Legacy fallback 12 ns/2 threads is a runtime setting, not a ground property;
+    # validated scene configs explicitly specify both before this function runs.
     lines = [f"#title: {preset.get('name', 'soil')} fixed global scene seed {seed}",
              f'#domain: {fmt(domain)}', f'#dx_dy_dz: {dx} {dx} {dx}',
              f"#time_window: {grid.get('time_window', 12e-9)}",
@@ -61,23 +102,29 @@ def prepare_scene(directory, preset, grid, seed, object_lines=(), generator=None
         if 'sand' in layer:
             s, c = layer['sand'], layer['clay']
             rho, theta0, theta1 = layer['bulk_density'], layer['water_min'], layer['water_max']
-            if not (s >= 0 and c >= 0 and s + c <= 1 and 0 <= theta0 < theta1 < 1 - rho / 2.66):
+            if not (s >= 0 and c >= 0 and s + c <= 1 and 0 <= theta0 < theta1 < 1 - rho / MINERAL_DENSITY_G_CM3):
                 raise ValueError('Invalid soil fractions, moisture range or porosity')
+            # Twenty material bins and fractal dimension 1.5 are configurable
+            # discretization/statistical defaults, not measured site properties.
+            # Unit weighting selects isotropic generation absent an explicit prior.
             n = int(layer.get('materials', 20))
             weighting = layer.get('weighting', [1, 1, 1])
-            lines += [f'#soil_peplinski: {s} {c} {rho} 2.66 {theta0} {theta1} {name}',
+            lines += [f'#soil_peplinski: {s} {c} {rho} {MINERAL_DENSITY_G_CM3} {theta0} {theta1} {name}',
                       f"#fractal_box: {corners} {layer.get('fractal_dimension', 1.5)} {fmt(weighting)} {n} {name} box_{i} {seed+i} n"]
         else:
+            # mu_r=1 and magnetic loss=0 assume nonmagnetic civil materials.
+            # Missing sigma=0 means an explicitly lossless dielectric approximation.
             lines += [f"#material: {layer['er']} {layer.get('sigma', 0)} 1 0 {name}",
                       f'#box: {corners} {name} n']
         layers.append(dict(layer, z_bottom_m=bottom, z_top_m=top, seed=seed+i))
         top = bottom
     lines.extend(object_lines)
-    lines += [f'#geometry_objects_write: 0 0 0 {fmt(domain)} global',
-              f'#geometry_view: 0 0 0 {fmt(domain)} {dx} {dx} {dx} scene n']
+    # Only the solver's canonical geometry is written here; the unified exporter
+    # produces scene.vti with physical arrays. Avoid a redundant full VTK volume.
+    lines += [f'#geometry_objects_write: 0 0 0 {fmt(domain)} global']
     inp = directory / 'scene.in'
     inp.write_text('\n'.join(lines) + '\n')
-    env = dict(os.environ, MPLCONFIGDIR=str(directory / '.mpl'))
+    env = _geometry_environment()
     with (directory / 'geometry.log').open('w') as log:
         subprocess.run([sys.executable, '-m', 'gprMax', str(inp), '--geometry-only'],
                        check=True, cwd=directory, env=env, stdout=log, stderr=subprocess.STDOUT)
@@ -127,12 +174,15 @@ def _prepare_custom_scene(directory, preset, grid, seed, object_lines):
         if 'sand' in original:
             rho = float(original['bulk_density'])
             lo, hi = float(original['water_min']), float(original['water_max'])
-            porosity = 1-rho/2.66
+            porosity = 1-rho/MINERAL_DENSITY_G_CM3
             if not (0 < porosity < 1 and 0 <= lo < hi < porosity):
                 raise ValueError('Invalid density or moisture range for custom field')
             custom = dict(original.get('custom', {}))
             if 'water_conductivity_s_m' not in custom:
                 raise ValueError('custom_crim_archie requires layer.custom.water_conductivity_s_m; it is not determined by Peplinski inputs')
+            # Map uniform [lo,hi] moisture moments to saturation: mean=(lo+hi)/2,
+            # standard deviation=(hi-lo)/sqrt(12), divided by nominal porosity.
+            # This matches two moments, not the resulting field distribution.
             params = dict(name=f'layer_{i}', thickness_m=top-bottom,
                           porosity=porosity, porosity_sd=0.0,
                           saturation=(lo+hi)/(2*porosity),
@@ -145,7 +195,9 @@ def _prepare_custom_scene(directory, preset, grid, seed, object_lines):
             layer = Layer(**params)
         else:
             # Placeholder fields are replaced by the exact engineering material.
-            # A flat lower boundary preserves asphalt/base thicknesses.
+            # A flat lower boundary preserves asphalt/base thicknesses. Values
+            # .3/.2/.05 below are discarded placeholder porosity/saturation/water
+            # conductivity; actual er/sigma overwrite them and pore fields are NaN.
             layer = Layer(f'layer_{i}', top-bottom, .3, 0, .2, 0, .05,
                           roughness_rms_m=0)
             constants[i+1] = (float(original['er']), float(original.get('sigma', 0)))
@@ -176,11 +228,10 @@ def _prepare_custom_scene(directory, preset, grid, seed, object_lines):
              f"#num_threads: {grid.get('threads', 2)}",
              f'#geometry_objects_read: 0 0 0 {geometry.name} {prefix} n',
              *object_lines,
-             f'#geometry_objects_write: 0 0 0 {fmt(domain)} global',
-             f'#geometry_view: 0 0 0 {fmt(domain)} {dx} {dx} {dx} scene n']
+             f'#geometry_objects_write: 0 0 0 {fmt(domain)} global']
     inp = directory/'scene.in'
     inp.write_text('\n'.join(lines)+'\n')
-    env = dict(os.environ, MPLCONFIGDIR=str(directory/'.mpl'))
+    env = _geometry_environment()
     with (directory/'geometry.log').open('w') as log:
         subprocess.run([sys.executable, '-m', 'gprMax', str(inp), '--geometry-only'],
                        check=True, cwd=directory, env=env, stdout=log, stderr=subprocess.STDOUT)

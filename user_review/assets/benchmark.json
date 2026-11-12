@@ -1,0 +1,248 @@
+{
+  "platform": "macOS-26.6.2-arm64-arm-64bit",
+  "machine": "arm64",
+  "python": "3.12.14",
+  "gprMax": "4.0.1",
+  "traces": 1,
+  "source_config_sha256": "c84fc42fa697817c35902128f9c9cf579ab7bc5d32fd4e0198f876173b260208",
+  "availability": {
+    "cpu": {
+      "available": true,
+      "device": "arm",
+      "reason": "gprMax CPU/OpenMP"
+    },
+    "cuda": {
+      "available": false,
+      "reason": "CUDA driver, PyCUDA and nvcc are required"
+    },
+    "metal": {
+      "available": true,
+      "device": "Apple M5",
+      "reason": "Metal device discovered; model compilation checked at run time"
+    }
+  },
+  "results": {
+    "cpu": {
+      "status": "completed",
+      "elapsed_seconds": 17.317867083998863,
+      "geometry_seconds": 0.005504417000338435,
+      "solver_seconds": 17.211889999976847,
+      "relative_l2_error": 0.0,
+      "max_abs_error_V_m": 0.0,
+      "numerical_match": true,
+      "end_to_end_speedup_vs_cpu": 1.0
+    },
+    "metal": {
+      "status": "completed",
+      "elapsed_seconds": 37.386663915996905,
+      "geometry_seconds": 0.007275583018781617,
+      "solver_seconds": 37.277889166987734,
+      "relative_l2_error": 1.995542973310498e-05,
+      "max_abs_error_V_m": 0.0028324127197265625,
+      "numerical_match": true,
+      "end_to_end_speedup_vs_cpu": 0.4632097456705395
+    }
+  },
+  "relative_tolerance": 0.0001,
+  "timing_scope": "fresh per-backend cache; includes geometry, input parsing and kernel compilation",
+  "crop_preparation": {
+    "applicable": true,
+    "repetitions": 3,
+    "identical_material_ids": true,
+    "previous_seconds": [
+      0.01871837500948459,
+      0.01675679101026617,
+      0.018050042010145262
+    ],
+    "fused_seconds": [
+      0.004197415983071551,
+      0.00515599999926053,
+      0.004628082999261096
+    ],
+    "median_speedup": 3.900111993027582,
+    "scope": "one cache miss, bounded moving crop; not whole FDTD simulation speedup"
+  },
+  "recommended_backend": "cpu",
+  "recommendation_scope": "Only this geometry, one trace, Apple M5 hardware and cold-run workload; remeasure for larger models.",
+  "case": {
+    "scene_config": "examples/scenes/park.json",
+    "trajectory_config": "examples/trajectories/snake.json",
+    "generator": "custom_crim_archie",
+    "grid": {
+      "domain": [
+        7.0,
+        4.8,
+        1.2
+      ],
+      "dx": 0.02,
+      "solver_dx": 0.01,
+      "surface_z": 0.8,
+      "time_window": 3.2e-08,
+      "threads": 2,
+      "pml_thickness": 0.12,
+      "frequency": 600000000.0
+    },
+    "simulation": {
+      "mode": "moving_window",
+      "window_xy": [
+        1.2,
+        1.2
+      ]
+    },
+    "source": {
+      "waveform": "gaussiandotnorm",
+      "frequency_hz": 600000000.0,
+      "moment_Am": 0.02,
+      "height_m": 0.02,
+      "tx_rx_offset_m": 0.1
+    }
+  },
+  "additional_dispersive_check": {
+    "scene_config": "examples/scenes/smoke.json",
+    "generator": "native_peplinski",
+    "traces": 1,
+    "results": {
+      "cpu": {
+        "status": "completed",
+        "elapsed_seconds": 2.1894832919933833,
+        "geometry_seconds": 0.0023057080106809735,
+        "solver_seconds": 2.182292375015095,
+        "relative_l2_error": 0.0,
+        "max_abs_error_V_m": 0.0,
+        "numerical_match": true,
+        "end_to_end_speedup_vs_cpu": 1.0
+      },
+      "metal": {
+        "status": "completed",
+        "elapsed_seconds": 6.758918624982471,
+        "geometry_seconds": 0.0023443750105798244,
+        "solver_seconds": 6.751603375014383,
+        "relative_l2_error": 8.918494728669518e-06,
+        "max_abs_error_V_m": 0.001617431640625,
+        "numerical_match": true,
+        "end_to_end_speedup_vs_cpu": 0.3239398805454714
+      }
+    },
+    "relative_tolerance": 0.0001
+  },
+  "scene_preparation": {
+    "source_scene": "examples/scenes/smoke.json",
+    "previous_commit": "43aad73",
+    "repetitions": 2,
+    "scope": "Geometry-only preparation including child process startup, field generation, object stamping, material export; no FDTD traces or rich preview/NumPy export. Same current field algorithm used in both versions; previous adapter additionally writes geometry_view.",
+    "results": {
+      "native_peplinski": {
+        "seconds": {
+          "previous": [
+            8.86946416599676,
+            8.739966249995632
+          ],
+          "current": [
+            8.445046042004833,
+            8.867341749981279
+          ],
+          "shared_cache": [
+            0.6088357499975245,
+            0.7211690409749281
+          ]
+        },
+        "checks": [
+          {
+            "ids": true,
+            "keys": true,
+            "material_database_equal": true
+          },
+          {
+            "ids": true,
+            "keys": true,
+            "material_database_equal": true
+          }
+        ],
+        "bytes_excluding_font_cache": {
+          "previous": [
+            3076014,
+            3076014
+          ],
+          "current": [
+            2822295,
+            2822295
+          ]
+        },
+        "median_speedup": 1.017157807898907,
+        "shared_cache_checks": [
+          {
+            "ids": true,
+            "keys": true,
+            "material_database_equal": true
+          },
+          {
+            "ids": true,
+            "keys": true,
+            "material_database_equal": true
+          }
+        ],
+        "shared_cache_median_speedup_vs_previous": 13.240125551064367
+      },
+      "custom_crim_archie": {
+        "seconds": {
+          "previous": [
+            8.773145207989728,
+            8.662514083000133
+          ],
+          "current": [
+            8.689592874987284,
+            8.77669554098975
+          ],
+          "shared_cache": [
+            0.7263206669886131,
+            0.6680918329802807
+          ]
+        },
+        "checks": [
+          {
+            "ids": true,
+            "keys": true,
+            "material_database_equal": true
+          },
+          {
+            "ids": true,
+            "keys": true,
+            "material_database_equal": true
+          }
+        ],
+        "bytes_excluding_font_cache": {
+          "previous": [
+            3905475,
+            3905475
+          ],
+          "current": [
+            3651596,
+            3651596
+          ]
+        },
+        "median_speedup": 0.9982463861664419,
+        "shared_cache_checks": [
+          {
+            "ids": true,
+            "keys": true,
+            "material_database_equal": true,
+            "continuous_fields_equal": true
+          },
+          {
+            "ids": true,
+            "keys": true,
+            "material_database_equal": true,
+            "continuous_fields_equal": true
+          }
+        ],
+        "shared_cache_median_speedup_vs_previous": 12.503946494583785
+      }
+    },
+    "shared_cache": {
+      "first_use_seconds": 9.569686458999058,
+      "cached_repetitions_per_generator": 2,
+      "scope": "Font cache initialized once, then reused across distinct gprMax child processes. The first use still pays the font-discovery cost. No persistent solver process or FDTD timing included.",
+      "behavior": "Respect writable caller MPLCONFIGDIR; otherwise project .cache/matplotlib; read-only project fallback to user-specific temporary cache."
+    }
+  }
+}

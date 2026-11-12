@@ -1,0 +1,2 @@
+# Static documentation rendering; not required for simulation.
+mistune==3.4.0

@@ -15,6 +15,7 @@ os.environ.setdefault('MPLCONFIGDIR', str(ROOT/'.cache/matplotlib'))
 import h5py
 import numpy as np
 from src.layout import object_commands
+from src.physical_constants import INCLUSION_EPSILON_R, INCLUSION_CONDUCTIVITY_S_M
 from src.soil import GENERATORS, prepare_scene, sha256
 from src import experiment_solver as solver
 
@@ -91,7 +92,7 @@ def prepare(directory, cfg, positions, rx=None):
     else:np.savez_compressed(archive, **positions)
     scene = directory/'scene'
     if not (scene/'soil.json').exists():
-        lines = ['#material: 4 0.001 1 0 inclusion']
+        lines = [f'#material: {INCLUSION_EPSILON_R} {INCLUSION_CONDUCTIVITY_S_M} 1 0 inclusion']
         lines += [command+' n' for command in object_commands(cfg['experiment_objects'])]
         prepare_scene(scene, cfg['preset'], cfg['grid'], cfg['seed'], object_lines=lines, generator=cfg['generator'])
     solver.validate_scene(directory)
@@ -219,11 +220,13 @@ def main():
     parser.add_argument('--trajectory', type=Path, help='prepare only: route JSON or CSV override')
     parser.add_argument('--mode', choices=GENERATORS, help='prepare only: soil generator override')
     parser.add_argument('--limit', type=int, help='run only: maximum number of NEW traces')
+    parser.add_argument('--backend', choices=('cpu', 'metal', 'cuda', 'auto'), help='run only: CPU/GPU override')
     args = parser.parse_args(); directory = destination(args.data)
     if args.command == 'prepare' and args.config is None:parser.error('prepare requires --config')
     if args.command != 'prepare' and any(x is not None for x in (args.config, args.mode, args.trajectory)):
         parser.error('run/status/plot use only frozen config and positions')
     if args.limit is not None and (args.command != 'run' or args.limit < 1):parser.error('--limit must be positive and is only for run')
+    if args.backend is not None and args.command != 'run':parser.error('--backend is only for run')
     if args.command != 'prepare' and not (directory/'config.json').exists():parser.error('Prepare this experiment first')
     if args.command == 'status':print(json.dumps(status(directory), indent=2)); return
     with locked(directory):
@@ -237,7 +240,7 @@ def main():
         else:
             verify_frozen(directory)
             cfg = json.loads((directory/'config.json').read_text()); positions = solver.load_positions(directory)
-            out = solver.run_survey(cfg, positions, directory, limit=args.limit)
+            out = solver.run_survey(cfg, positions, directory, limit=args.limit, backend=args.backend)
             s = cfg['sfcw']; solver.effective_sfcw(out, fmin=s['fmin_hz'], fmax=s['fmax_hz'], df=s['df_hz'])
         print('READY', directory, flush=True)
 

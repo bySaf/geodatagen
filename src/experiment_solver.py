@@ -11,6 +11,7 @@ import h5py
 import numpy as np
 
 from .soil import crop_scene, sha256
+from .backends import resolve_backend, solver_options
 
 
 def signature(value):
@@ -109,13 +110,15 @@ def validate_scene(directory):
     return meta
 
 
-def _refine(source, dest, factor, dx):
+def _refine(source, dest, factor, dx, slices=None):
     """Refine only the selected crop; fixed mode explicitly refines its full scene."""
     with h5py.File(source) as src, h5py.File(dest, 'w') as dst:
-        a = src['data'][:]
+        a = src['data'][slices if slices is not None else np.s_[:]]
         for axis in range(3):
             if factor > 1:a = np.repeat(a, factor, axis=axis)
-        dst.create_dataset('data', data=a, compression='gzip')
+        # LZF is lossless and faster for the disposable solver cache than gzip;
+        # this changes storage only, never material indices or field physics.
+        dst.create_dataset('data', data=a, compression='lzf')
         dst['material_keys'] = src['material_keys'][:]
         for name in ('MaterialDatabase', 'MaterialDatabaseSchemaVersion'):
             dst.attrs[name] = src.attrs[name]
@@ -139,14 +142,18 @@ def prepare_geometry(cfg, directory, meta, origin=None):
         valid = saved.get('description') == description and saved.get('sha256') == sha256(geometry)
     if not valid:
         source = scene/meta['geometry']
+        slices = None
         if moving:
-            source = cache/'coarse.h5'
-            crop_scene(scene, source, origin, window_xy=cfg['simulation']['window_xy'])
+            start = np.rint(np.asarray(origin)/g['dx']).astype(int)
+            count = np.rint(np.asarray(cfg['simulation']['window_xy'])/g['dx']).astype(int)
+            if np.any(start < 0) or np.any(start+count > np.asarray(meta['shape'][:2])):
+                raise ValueError('Crop outside scene')
+            # One bounded HDF5 read replaces coarse crop write + reopen + read.
+            slices = np.s_[start[0]:start[0]+count[0], start[1]:start[1]+count[1], :]
         temp = cache/'geometry.tmp.h5'
-        _refine(source, temp, round(g['dx']/g['solver_dx']), g['solver_dx'])
+        _refine(source, temp, round(g['dx']/g['solver_dx']), g['solver_dx'], slices=slices)
         temp.replace(geometry)
         stamp.write_text(json.dumps(dict(description=description, sha256=sha256(geometry)), indent=2)+'\n')
-        if moving:source.unlink(missing_ok=True)
     database = cache/meta['materials']
     if not database.exists() or sha256(database) != meta['materials_sha256']:
         shutil.copyfile(scene/meta['materials'], database)
@@ -178,6 +185,8 @@ def source_values(cfg, dt, n):
     from gprMax.waveforms import Waveform
     w = Waveform(); w.type = cfg['source']['waveform']; w.freq = cfg['source']['frequency_hz']
     w.amp = cfg['source']['moment_Am']/cfg['grid']['solver_dx']
+    # gprMax's Hertzian current is injected at half steps of the Yee leapfrog
+    # time grid; the 0.5 offset preserves its phase for source deconvolution.
     times = (np.arange(n)+.5)*dt
     return times, np.asarray([w.calculate_value(float(t), dt) for t in times], dtype=np.float64)
 
@@ -194,10 +203,11 @@ def _store_positions(out, positions):
             else:out.create_dataset(name, data=values)
 
 
-def run_survey(cfg, positions, directory, limit=None):
+def run_survey(cfg, positions, directory, limit=None, backend=None):
     """Resume only the saved configuration and saved coordinates, without reloading inputs."""
     directory = Path(directory); positions = validate_positions(cfg, positions)
     meta = validate_scene(directory); key = signature(cfg)
+    selected_backend = resolve_backend(backend or cfg['grid'].get('backend', 'cpu'))
     moving = cfg.get('simulation', {}).get('mode', 'fixed') == 'moving_window'
     origins = crop_origins(cfg, positions) if moving else None
     n = len(positions['tx_m']); outpath = directory/'bscan.h5'
@@ -220,6 +230,11 @@ def run_survey(cfg, positions, directory, limit=None):
             if name in out.attrs and out.attrs[name] != meta[name]:raise ValueError('Output geometry identity differs')
             out.attrs[name] = meta[name]
         _store_positions(out, positions)
+        if 'backend_per_trace' not in out:
+            # An empty label means the old result did not record its backend.
+            out.create_dataset('backend_per_trace', data=np.asarray(['']*n, dtype=object), dtype=h5py.string_dtype('utf-8'))
+        for name in ('geometry_seconds', 'solve_seconds'):
+            if name not in out:out[name] = np.full(n, np.nan)
         if moving:
             if 'crop_origin_xy_m' in out and not np.array_equal(out['crop_origin_xy_m'][:], origins):
                 raise ValueError('Saved moving-window origins differ')
@@ -230,11 +245,13 @@ def run_survey(cfg, positions, directory, limit=None):
             import gprMax
             start = time.monotonic(); origin = origins[i] if moving else None
             geometry, database, domain = prepare_geometry(cfg, directory, meta, origin)
+            prepared_at = time.monotonic()
             shift = np.r_[origin, 0.] if moving else np.zeros(3)
             fn = geometry.parent/'scan.in'
             fn.write_text(input_text(cfg, geometry, database, positions['tx_m'][i]-shift, positions['rx_m'][i]-shift, domain))
             with (directory/'run'/'last.log').open('w') as log, contextlib.redirect_stdout(log), contextlib.redirect_stderr(log):
-                gprMax.run(inputfile=str(fn), metal=(True if cfg['grid'].get('backend', 'cpu') == 'metal' else None), hide_progress_bars=True, log_level=40)
+                gprMax.run(inputfile=str(fn), **solver_options(selected_backend), hide_progress_bars=True, log_level=40)
+            solved_at = time.monotonic()
             with h5py.File(fn.with_suffix('.h5')) as raw:
                 a = raw['rxs/rx1/Ey'][:]; dt = float(raw.attrs['dt'])
                 if not np.isfinite(a).all() or not np.any(a):raise ValueError(f'Invalid FDTD field at trace {i}')
@@ -245,10 +262,13 @@ def run_survey(cfg, positions, directory, limit=None):
                     out.attrs.update(dt=dt, gprMax=raw.attrs['gprMax'], source_dl_m=cfg['grid']['solver_dx'])
                 if len(a) != out['Ey'].shape[1] or dt != out.attrs['dt']:raise ValueError('Time grid changed')
                 out['Ey'][i] = a; out['seconds'][i] = time.monotonic()-start
+                out['geometry_seconds'][i] = prepared_at-start
+                out['solve_seconds'][i] = solved_at-prepared_at
+                out['backend_per_trace'][i] = selected_backend
                 out.flush(); out['complete'][i] = True; out.flush()
             progress = dict(mode=cfg['generator'], completed=int(out['complete'][:].sum()), total=n,
                             last_index=int(i), last_route=str(positions['route_id'][i]),
-                            last_distance_m=float(positions['distance_m'][i]), last_seconds=float(out['seconds'][i]), pid=os.getpid())
+                            last_distance_m=float(positions['distance_m'][i]), last_seconds=float(out['seconds'][i]), backend=selected_backend, pid=os.getpid())
             (directory/'progress.json').write_text(json.dumps(progress, indent=2)+'\n')
             print(json.dumps(progress), flush=True)
     return outpath
@@ -256,7 +276,7 @@ def run_survey(cfg, positions, directory, limit=None):
 
 def effective_sfcw(outpath, **sweep):
     # Retain the established physical units and exact source deconvolution.
-    from tools.run_realism_pilot import effective_sfcw as process
+    from .signal_processing import effective_sfcw as process
     process(Path(outpath), **sweep)
     path = Path(outpath).parent/'effective_sfcw.npz'
     with h5py.File(outpath) as h:

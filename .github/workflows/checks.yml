@@ -16,10 +16,11 @@ jobs:
           cache: pip
           cache-dependency-path: requirements-lock.txt
       - name: Install CPU runtime
-        run: python -m pip install --only-binary=gprMax -r requirements-lock.txt
+        run: python -m pip install --only-binary=gprMax -r requirements-lock.txt -r requirements-docs.txt
       - name: Check dependencies and documentation
         run: |
           python -m pip check
+          python tools/build_docs.py
           python tools/check_docs.py
           python geodatagen.py --help
       - name: Check scenes and experiment isolation

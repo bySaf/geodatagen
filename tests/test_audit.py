@@ -3,7 +3,7 @@ import unittest
 from pathlib import Path
 import h5py
 import numpy as np
-from tools.check_dataset import check_signal
+from src.validation import check_signal
 
 
 class AuditTests(unittest.TestCase):

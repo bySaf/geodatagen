@@ -70,8 +70,13 @@ def refresh(directory, export=False, plots=False):
     if state.get('running'):
         return state
     with experiment.locked(directory):
+        # A derived export must describe the same frozen scene as the solver.
+        experiment.verify_frozen(directory)
+        experiment.solver.validate_scene(directory)
         if export or not (directory / 'scene' / 'scene.vti').exists():
             experiment_outputs.export_geometry(directory)
+        else:
+            experiment_outputs.export_numpy(directory, signals_only=True)
         if plots and state.get('completed', 0):experiment.plot(directory)
         sweep_metadata = directory / 'effective_sfcw.json'
         if sweep_metadata.is_file():
@@ -94,14 +99,22 @@ def main(argv=None):
     scene_input = init.add_mutually_exclusive_group()
     scene_input.add_argument('--scene', type=Path, help='JSON сцены: грунт, объекты, источник и область расчёта')
     scene_input.add_argument('--config', type=Path, help='Совместимость с прежним JSON сцены и прямого профиля')
-    init.add_argument('--trajectory', type=Path, help='JSON маршрута: прямая, змейка, точки или CSV')
+    init.add_argument('--trajectory', type=Path, help='JSON маршрута: прямая, змейка, точки, CSV или случайная выборка')
     run = subs.add_parser('run', help='Рассчитать или продолжить маршрут; графики обновятся автоматически')
     run.add_argument('name'); run.add_argument('--limit', type=int); run.add_argument('--resume', action='store_true', help='Удалить локальный STOP и продолжить')
-    for command, help_text in [('status', 'Показать прогресс'), ('plot', 'Обновить графики и отчёт'), ('export', 'Обновить VTI для ParaView и отчёт'), ('stop', 'Остановиться после текущей трассы')]:
+    run.add_argument('--backend', choices=('cpu', 'metal', 'cuda', 'auto'), help='Вычислитель FDTD; по умолчанию CPU')
+    subs.add_parser('backends', help='Показать доступные CPU/GPU')
+    bench = subs.add_parser('benchmark', help='Сравнить CPU/GPU на копии опыта и проверить совпадение сигналов')
+    bench.add_argument('name'); bench.add_argument('--traces', type=int, default=1)
+    bench.add_argument('--backends', nargs='+', choices=('cpu', 'metal', 'cuda'), default=['cpu', 'metal', 'cuda'])
+    for command, help_text in [('status', 'Показать прогресс'), ('plot', 'Обновить графики и отчёт'), ('export', 'Обновить NumPy, ParaView и отчёт'), ('stop', 'Остановиться после текущей трассы')]:
         sub = subs.add_parser(command, help=help_text); sub.add_argument('name')
     docs = subs.add_parser('docs', help='Открыть документацию или отчёт эксперимента')
     docs.add_argument('name', nargs='?'); docs.add_argument('--no-open', action='store_true', help='Только вывести путь')
     args = parser.parse_args(argv)
+    if args.command == 'backends':
+        from src.backends import probe_backends
+        print(json.dumps(probe_backends(), indent=2, ensure_ascii=False)); return 0
     if args.command == 'docs':
         path = experiment_path(args.name) / 'index.html' if args.name else ROOT / 'user_review' / 'index.html'
         if not path.is_file():raise ValueError('Страница ещё не создана; сначала выполните init.')
@@ -138,6 +151,17 @@ def main(argv=None):
         refresh(directory, export=True)
     else:
         if not (directory / 'config.json').is_file():raise ValueError('Эксперимент не подготовлен. Сначала выполните init.')
+        if args.command == 'benchmark':
+            if args.traces < 1:raise ValueError('--traces должен быть положительным.')
+            sys.path.insert(0, str(ROOT / 'tools'))
+            import experiment
+            target = directory / 'benchmarks' / datetime.now(timezone.utc).strftime('%Y%m%d-%H%M%S-%f')
+            with experiment.locked(directory):
+                experiment.verify_frozen(directory)
+                result = subprocess.run([sys.executable, str(ROOT/'tools/benchmark.py'), '--data', str(directory),
+                    '--output', str(target), '--traces', str(args.traces), '--backends', *args.backends], cwd=ROOT)
+            print(f'Сравнение: {target / "benchmark.json"}')
+            return result.returncode
         if args.command == 'stop':
             (directory / 'STOP').touch();print('Остановка запрошена: после текущей трассы. Продолжить: run --resume.');return 0
         if args.command == 'status':
@@ -148,7 +172,9 @@ def main(argv=None):
             if args.limit is not None and args.limit < 1:raise ValueError('--limit должен быть положительным.')
             if args.resume:(directory / 'STOP').unlink(missing_ok=True)
             if (directory / 'STOP').exists():raise ValueError('Есть файл STOP. Для продолжения добавьте --resume.')
-            invoke(directory, 'run', ['--limit', str(args.limit)] if args.limit else [])
+            options = ['--limit', str(args.limit)] if args.limit else []
+            if args.backend:options += ['--backend', args.backend]
+            invoke(directory, 'run', options)
             refresh(directory, plots=True)
         elif args.command == 'plot':refresh(directory, plots=True)
         elif args.command == 'export':refresh(directory, export=True)

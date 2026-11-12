@@ -14,7 +14,9 @@ class ExperimentTests(unittest.TestCase):
     def setUp(self):
         self.tmp=tempfile.TemporaryDirectory(prefix='gpr-experiment-test-')
         self.root=Path(self.tmp.name)
-        self.source=json.loads((ROOT/'user_review/realism/park-pilot.json').read_text())
+        self.source=json.loads((ROOT/'examples/scenes/park-pilot.json').read_text())
+
+        self.source['trajectory']=json.loads((ROOT/'examples/trajectories/pilot-line.json').read_text())
 
     def tearDown(self):self.tmp.cleanup()
 

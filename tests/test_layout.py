@@ -2,68 +2,9 @@ import unittest
 import tempfile
 import json
 from pathlib import Path
-import numpy as np
-from src.layout import generate_objects, load_object_coordinates, make_trajectories, overlap_matrix, straight_path
-
-ROOT = Path(__file__).resolve().parents[1]
+from src.layout import load_object_coordinates
 
 class LayoutTests(unittest.TestCase):
-    def test_objects_reproducible_and_valid(self):
-        args=(ROOT/'objects.txt',42,[7,4.8,1.2],.9)
-        objects=generate_objects(*args)
-        self.assertEqual(objects,generate_objects(*args))
-        self.assertEqual(generate_objects(*args,control=True),[])
-        self.assertEqual(len({o['type'] for o in objects}),3)
-        for i,o in enumerate(objects):
-            c=np.array(o['center_m']); r=o['radius_m']
-            self.assertGreaterEqual(c[2]-r,.2)
-            self.assertLessEqual(c[2]+r,.86)
-            for b in objects[:i]:
-                self.assertGreaterEqual(np.linalg.norm(c-b['center_m']),r+b['radius_m']+.04)
-
-    def test_paths_have_distinct_overlap_and_solver_coordinates(self):
-        paths=make_trajectories()
-        overlap=np.asarray(overlap_matrix(paths))
-        self.assertGreater(overlap[0,1],.99)
-        self.assertEqual(overlap[0,2],0)
-        self.assertEqual(overlap[1,2],0)
-        for p in paths:
-            a=p['snapped_tx']; self.assertEqual(a.shape,(500,3))
-            self.assertTrue(np.allclose(a/.02,np.round(a/.02)))
-            self.assertTrue(np.allclose(p['snapped_rx']-a,[.04,0,0]))
-            distances=np.linalg.norm(np.diff(a,axis=0),axis=1)
-            self.assertTrue(np.all((distances>.04)&(distances<.13)))
-        self.assertTrue(np.allclose(np.linalg.norm(np.diff(paths[0]['requested_tx'],axis=0),axis=1),.1))
-        self.assertGreater(len(np.unique(np.round(np.diff(paths[2]['requested_tx'][:,:2],axis=0),6),axis=0)),20)
-
-    def test_straight_and_invalid_configuration(self):
-        a=straight_path([1,2,3],[1,0,0],500,.1)
-        self.assertTrue(np.allclose(a[-1],[50.9,2,3]))
-        with self.assertRaises(ValueError):make_trajectories(domain=[2,2,1.2])
-
-    def test_custom_lines_and_rounded_start(self):
-        specs=[dict(shape='line',start=[1,1],direction=[1,0]),
-               dict(shape='line',start=[1,1.04],end=[2.9,1.04]),
-               dict(shape='rounded_raster',start=[1,3],rows=2,row_pitch=.2)]
-        paths=make_trajectories(n=20,paths=specs)
-        self.assertTrue(np.allclose(paths[0]['requested_tx'][-1],[2.9,1,.96]))
-        self.assertTrue(np.allclose(paths[1]['requested_tx'][-1],[2.9,1.04,.96]))
-        self.assertTrue(np.allclose(paths[2]['requested_tx'][0],[1,3,.96]))
-        moved=make_trajectories(start_x=.9,start_y=.9)
-        self.assertTrue(np.allclose(moved[0]['requested_tx'][0],[.9,.9,.96]))
-        specs[1]['step']=.2
-        with self.assertRaises(ValueError): make_trajectories(n=20,paths=specs)
-        with self.assertRaises(ValueError): make_trajectories(paths=specs[:2])
-        with self.assertRaises(ValueError): make_trajectories(n=2000)
-
-    def test_zero_count_text_and_impossible_objects(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            p=Path(tmp)/'objects.txt'
-            p.write_text('metal 0 0 .06 .08 .4 .5\n')
-            self.assertEqual(generate_objects(p,42,[7,4.8,1.2],.9),[])
-            p.write_text('metal 1 1 .2 .3 .01 .02\n')
-            with self.assertRaises(ValueError): generate_objects(p,42,[7,4.8,1.2],.9)
-
     def test_explicit_coordinates_preserve_position_and_derive_depth(self):
         with tempfile.TemporaryDirectory() as tmp:
             p=Path(tmp)/'coordinates.json'
@@ -102,16 +43,3 @@ class LayoutTests(unittest.TestCase):
             p.write_text('{"park": [], "park": [], "field": []}')
             with self.assertRaises(ValueError):
                 load_object_coordinates(p,['park','field'],[7,4.8,1.2],.9)
-
-if __name__=='__main__': unittest.main()
-
-class LargeObjectBoundsTest(unittest.TestCase):
-    def test_survey_band_override_preserves_horizontal_bounds(self):
-        import tempfile
-        with tempfile.TemporaryDirectory() as tmp:
-            spec=Path(tmp)/'objects.txt'
-            spec.write_text('metal 1 1 1.5 1.5 2 2\n')
-            for o in generate_objects(spec,42,[7,4.8,6],5):
-                c=np.asarray(o['center_m']);r=o['radius_m']
-                self.assertTrue(np.all(c[:2]-r>=.2))
-                self.assertTrue(np.all(c[:2]+r<=np.array([7,4.8])-.2))

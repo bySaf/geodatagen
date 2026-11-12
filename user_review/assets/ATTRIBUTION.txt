@@ -1,0 +1,10 @@
+Real SFCW radar figures: real-hyperbola.png and real-data panel of bscan-comparison.png.
+Mercedes Solla (2024), GPR dataset: pulsed radar and SFCW data for rebar detection (experimental data).
+SFCW measurements supplied by Screening Eagle Technologies; Proceq GP8800, concrete specimen II.
+Dataset: https://doi.org/10.5281/zenodo.10962520
+Associated article: https://doi.org/10.1016/j.prostr.2024.09.250
+License of dataset: GPL-3.0-or-later. See GPL-3.0.txt and https://www.gnu.org/licenses/gpl-3.0.html
+
+Changes for the figures: read SEG-Y/CSV, reconstruct time sampling from CSV, subtract trace DC offset and mean trace, normalize display by P99. No hyperbolas were drawn over the data. real-hyperbola.png retains the original 5 mm spatial sampling and shows a magnified selection. The comparison panel was smoothed and resampled to 5 cm x 50 ps and cropped to 1.4 m x [0,16) ns. Time zero and phase were not fitted to synthetic data. Source measurements are available at the dataset DOI.
+
+All other figures depict project simulations or configuration geometry. Their values are scenario settings rather than measurements of a specific field site.

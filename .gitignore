@@ -22,19 +22,5 @@ __pycache__/
 *.zip
 *.pdf
 
-# Large local research downloads and generated pilot solver files
+# Historical research downloads remain local and are not part of the package.
 /validation_real/
-/user_review/realism/reference_soil/
-/user_review/realism/reference_radar/_deps/
-/user_review/realism/reference_radar/raw/
-/user_review/realism/reference_radar/Radar_data_emi_data.pkl
-/user_review/realism/reference_radar/soil_golfcourse_*
-/user_review/realism/reference_hyperbola/candidates_concrete.png
-/user_review/realism/pilot/
-/user_review/paraview/
-/user_review/soil_modes/preview_geometry/
-/user_review/soil_modes/smoke/
-/user_review/**/run/
-
-# Compact licensed source archive used to reproduce the published reference
-!/user_review/realism/reference_radar/SFCW.zip

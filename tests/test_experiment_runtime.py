@@ -68,8 +68,8 @@ class RuntimeTests(unittest.TestCase):
             self.assertEqual(solver.prepare_geometry(self.cfg, self.root, self.meta, origin)[0], geometry)
             crop.assert_not_called()
         with h5py.File(geometry, 'r+') as h:h['data'][0,0,0] = -1
-        with patch.object(solver, 'crop_scene', wraps=solver.crop_scene) as crop:
-            solver.prepare_geometry(self.cfg, self.root, self.meta, origin); crop.assert_called_once()
+        with patch.object(solver, '_refine', wraps=solver._refine) as refine:
+            solver.prepare_geometry(self.cfg, self.root, self.meta, origin); refine.assert_called_once()
 
     def test_limit_stop_resume_metadata_and_frozen_inputs(self):
         before = {name: sha256(self.root/name) for name in ('config.json','positions.npz','scene/soil.json')}

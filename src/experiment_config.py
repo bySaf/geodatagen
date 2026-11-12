@@ -6,6 +6,7 @@ import tempfile
 
 import numpy as np
 
+from .physical_constants import MINERAL_DENSITY_G_CM3, GEOMETRY_CLEARANCE_M, OBJECT_CLEARANCE_M
 from .layout import load_object_coordinates, MATERIALS
 from .soil import GENERATORS, custom_generator_fingerprint
 
@@ -40,18 +41,24 @@ def integer(value, name, minimum=0):
 
 def random_objects(spec, grid, default_seed):
     """Place spheres in declared XY bounds, independently of the survey path."""
-    allowed = {'seed', 'clearance_m', 'bounds_m', 'rules'}
+    allowed = {'seed', 'clearance_m', 'bounds_m', 'rules', 'method', 'min_distance_m'}
     if not isinstance(spec, dict) or set(spec) - allowed:
         raise ValueError('Unknown object_generation fields')
     seed = integer(spec.get('seed', default_seed), 'object_generation.seed')
-    clearance = number(spec.get('clearance_m', .04), 'clearance_m', 0)
-    pad = max(.2, grid['pml_thickness'])
+    clearance = number(spec.get('clearance_m', OBJECT_CLEARANCE_M), 'clearance_m', 0)
+    pad = max(GEOMETRY_CLEARANCE_M, grid['pml_thickness'])
     bounds = np.asarray(spec.get('bounds_m', [[pad, grid['domain'][0]-pad], [pad, grid['domain'][1]-pad]]), dtype=float)
     if bounds.shape != (2, 2) or not np.isfinite(bounds).all() or np.any(bounds[:, 1] <= bounds[:, 0]):
         raise ValueError('bounds_m requires [[xmin,xmax],[ymin,ymax]]')
     if np.any(bounds[:, 0] < pad) or np.any(bounds[:, 1] > np.asarray(grid['domain'][:2])-pad):
         raise ValueError('Object generation bounds must stay inside the scene and outside PML')
     rng = np.random.default_rng(seed)
+    method = spec.get('method', 'uniform')
+    if method not in ('uniform', 'sobol', 'poisson_disk'):
+        raise ValueError('method must be uniform, sobol or poisson_disk')
+    exclusion = spec.get('min_distance_m', 0)
+    if method == 'poisson_disk':number(exclusion, 'min_distance_m', 0, True)
+    elif 'min_distance_m' in spec:raise ValueError('min_distance_m applies only to poisson_disk')
     result = []
     rules = spec.get('rules', [])
     if not isinstance(rules, list):
@@ -80,15 +87,23 @@ def random_objects(spec, grid, default_seed):
             ranges.append((lo, hi))
         if ranges[0][0] < grid['dx']:
             raise ValueError('Object radius must be at least one geometry cell')
+        from .sampling import proposals
+        # A fixed burial depth is a valid object constraint. Sample a dummy
+        # unit interval in that dimension and replace it by the exact depth;
+        # spatial X/Y bounds still need nonzero extent.
+        fixed_depth = ranges[1][0] == ranges[1][1]
+        depth_bounds = [0, 1] if fixed_depth else list(ranges[1])
+        candidates = iter(proposals([*bounds.tolist(), depth_bounds], max(1, count * 2000), int(rng.integers(2**31)), method))
         for _ in range(count):
             for attempt in range(2000):
                 r = float(rng.uniform(*ranges[0]))
-                depth = float(rng.uniform(*ranges[1]))
-                xy = rng.uniform(bounds[:, 0], bounds[:, 1])
+                candidate = next(candidates)
+                xy = candidate[:2]
+                depth = ranges[1][0] if fixed_depth else float(candidate[2])
                 c = np.r_[xy, grid['surface_z']-depth]
                 if np.any(c-r < pad) or np.any(c+r > np.asarray(grid['domain'])-pad) or c[2]+r > grid['surface_z']-clearance:
                     continue
-                if any(np.linalg.norm(c-o['center_m']) < r+o['radius_m']+clearance for o in result):
+                if any(np.linalg.norm(c-o['center_m']) < max(r+o['radius_m']+clearance, exclusion) for o in result):
                     continue
                 result.append(dict(type=rule['type'], center_m=c.tolist(), radius_m=r))
                 break
@@ -160,7 +175,7 @@ def _load_settings(path, mode=None, trajectory_path=None):
                 raise ValueError('Sand and clay fractions must sum to at most 1')
             density = number(layer['bulk_density'], 'bulk_density', 0, True)
             lo, hi = [number(layer[k], k, 0) for k in ('water_min', 'water_max')]
-            if density >= 2.66 or not 0 <= lo < hi < 1-density/2.66:
+            if density >= MINERAL_DENSITY_G_CM3 or not 0 <= lo < hi < 1-density/MINERAL_DENSITY_G_CM3:
                 raise ValueError('Moisture range must fit the soil porosity')
             if cfg['generator'] == 'custom_crim_archie' and 'water_conductivity_s_m' not in layer.get('custom', {}):
                 raise ValueError('Model fields requires layer.custom.water_conductivity_s_m')
@@ -171,7 +186,7 @@ def _load_settings(path, mode=None, trajectory_path=None):
         raise ValueError('Layer thicknesses must add up to surface_z')
     if 'objects' in raw and 'object_generation' in raw:
         raise ValueError('Choose objects OR object_generation, not both')
-    clearance = .04
+    clearance = OBJECT_CLEARANCE_M
     if 'object_generation' in raw:
         objects, clearance = random_objects(raw['object_generation'], g, cfg['seed'])
     else:

@@ -17,9 +17,28 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path[:0] = [str(ROOT), str(ROOT / 'tools')]
 import geodatagen
 import experiment_outputs as outputs
+import experiment
 
 
 class WorkflowTests(unittest.TestCase):
+    def test_refresh_rejects_changed_frozen_inputs_before_export(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            folder=Path(tmp)
+            (folder/'config.json').write_text('{"profile":{"n":3}}')
+            with patch.object(experiment,'verify_frozen',side_effect=ValueError('Frozen input changed')), patch.object(outputs,'export_geometry') as export:
+                with self.assertRaisesRegex(ValueError,'Frozen input changed'):
+                    geodatagen.refresh(folder,export=True)
+                export.assert_not_called()
+
+    def test_refresh_rejects_changed_materials_before_export(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            folder=Path(tmp)
+            (folder/'config.json').write_text('{"profile":{"n":3}}')
+            with patch.object(experiment.solver,'validate_scene',side_effect=ValueError('Material changed')), patch.object(outputs,'export_geometry') as export:
+                with self.assertRaisesRegex(ValueError,'Material changed'):
+                    geodatagen.refresh(folder,export=True)
+                export.assert_not_called()
+
     def test_names_cannot_escape_output_folder(self):
         for name in ('../other', '/tmp/output', 'x/y', '.', 'x y', ''):
             with self.assertRaises(ValueError):geodatagen.experiment_path(name)

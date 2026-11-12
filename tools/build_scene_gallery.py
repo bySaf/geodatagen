@@ -18,7 +18,7 @@ from experiment_outputs import geometry_fields
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--experiments', nargs=3, type=Path, required=True, metavar=('PARK', 'FIELD', 'ROAD'))
-    parser.add_argument('--out', type=Path, default=ROOT/'user_review/scenes')
+    parser.add_argument('--out', type=Path, required=True, help='Output directory for gallery figures and metadata')
     args = parser.parse_args(); args.out.mkdir(parents=True, exist_ok=True)
     fig, axes = plt.subplots(3, 1, figsize=(12, 8), layout='constrained')
     plan, maps = plt.subplots(1, 3, figsize=(15, 5), layout='constrained')

@@ -119,9 +119,10 @@ def _route(spec, default_z, base_dir, name):
         "waypoints": {"points", "step_m"},
         "points": {"points", "segment_ids"},
         "csv": {"file", "step_m"},
+        "random": {"bounds_m", "count", "seed", "method", "min_distance_m", "order"},
     }
     if not isinstance(kind, str) or kind not in allowed:
-        raise ValueError(f"{name}: type must be line, snake, waypoints, points or csv")
+        raise ValueError(f"{name}: type must be line, snake, waypoints, points, csv or random")
     unknown = set(spec) - allowed[kind] - {"type", "name"}
     if unknown:
         raise ValueError(f"{name}: unknown trajectory fields: {sorted(unknown)}")
@@ -129,7 +130,22 @@ def _route(spec, default_z, base_dir, name):
     step = None
     if kind in {"line", "snake", "waypoints"} or "step_m" in spec:
         step = _number(spec.get("step_m"), f"{name}.step_m", positive=True)
-    if kind == "line":
+    if kind == "random":
+        from .sampling import sample_coordinates, nearest_order
+        bounds = spec.get('bounds_m')
+        if not isinstance(bounds, list) or len(bounds) != 2:
+            raise ValueError('Random trajectory bounds_m requires X and Y ranges')
+        count = spec.get('count')
+        if isinstance(count, bool) or not isinstance(count, int) or count < 1:
+            raise ValueError('Random trajectory count must be a positive integer')
+        xy = sample_coordinates(bounds, count, spec.get('seed', 0), spec.get('method', 'uniform'), spec.get('min_distance_m'))
+        order = spec.get('order', 'nearest')
+        if order not in ('nearest', 'sample'):raise ValueError('order must be nearest or sample')
+        if order == 'nearest':xy = nearest_order(xy)
+        points = np.c_[xy, np.full(len(xy), default_z)]
+        segments = np.arange(len(points), dtype=np.int64)
+        canonical.update(type='points', points=points.tolist(), segment_ids=segments.tolist())
+    elif kind == "line":
         start = _point(spec.get("start"), default_z, f"{name}.start")
         end = _point(spec.get("end"), default_z, f"{name}.end")
         points = _line_points(start, end, step)

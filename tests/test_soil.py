@@ -96,7 +96,7 @@ class CustomSoilIntegrationTest(unittest.TestCase):
                          (self.root/'crop'/'global_materials.json').read_bytes())
 
     def test_report_uses_custom_moisture_instead_of_debye_inversion(self):
-        from src.report import soil_statistics
+        from src.validation import soil_statistics
         meta, _, _, layers = soil_statistics(self.root/'a',4e8)
         self.assertEqual(meta['generator'],'custom_crim_archie')
         self.assertTrue(layers[0]['constant_material'])

@@ -102,7 +102,7 @@ cat <<'EOF'
 Ready. Next:
   source .venv/bin/activate
   python geodatagen.py docs
-  python geodatagen.py init first-test --config examples/smoke.json
+  python geodatagen.py init first-test --scene examples/scenes/smoke.json --trajectory examples/trajectories/smoke.json
   python geodatagen.py run first-test --limit 1
 
 Experiment files stay in experiments/first-test/.

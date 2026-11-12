@@ -1,8 +1,8 @@
 """Coupled random soil fields adapted from the user-provided gpr_fields.py.
 
-Source: /Users/davsf/Downloads/to_send/gpr_fields.py
+Source: user-provided gpr_fields.py
 Source SHA-256: c0521175dd50185a82b3bfc27246cef759761dee0530f463314a1d649b0870a1
-Copied core: Layer/Pipe/Config/Fields, validation, Matérn-like FFT fields,
+Adapted core: Layer/Config/Fields, validation, Matérn-like FFT fields,
 rough stratigraphy, coupled CRIM/Archie conversion and material quantization.
 The original module's authorship is not established here. Its cited methods:
 10.1109/JSTARS.2015.2468597, 10.1137/S1064827592240555, 10.2118/942054-G.
@@ -14,11 +14,13 @@ CRIM/Archie is nondispersive and approximate, not an improved Peplinski model.
 
 from __future__ import annotations
 
-import json
-from dataclasses import asdict, dataclass
-from pathlib import Path
+from dataclasses import dataclass
 
 import numpy as np
+from .physical_constants import (WATER_EPSILON_R, GRAIN_EPSILON_R, ARCHIE_A, ARCHIE_M,
+    ARCHIE_N, SURFACE_CORRELATION_M, ROUGHNESS_CLIP_SD, INTERFACE_THICKNESS_FRACTION,
+    LOCAL_CORRELATION_RATIO, POROSITY_MIX, SATURATION_MIX, POROSITY_LIMITS,
+    SATURATION_LIMITS, PORE_CONDUCTIVITY_LOG_SD)
 
 
 FIELD_NAMES = ("epsilon_r", "sigma_s_m", "resistivity_ohm_m",
@@ -34,37 +36,25 @@ class Layer:
     saturation: float
     saturation_sd: float
     water_conductivity_s_m: float
-    grain_permittivity: float = 4.5
-    archie_a: float = 1.0
-    archie_m: float = 1.5
-    archie_n: float = 2.0
+    grain_permittivity: float = GRAIN_EPSILON_R
+    archie_a: float = ARCHIE_A
+    archie_m: float = ARCHIE_M
+    archie_n: float = ARCHIE_N
     surface_conductivity_s_m: float = 0.0  # calibrate for clay
+    # Illustrative anisotropic scales/roughness, not measured covariance parameters.
     correlation_m: tuple[float, float, float] = (0.10, 0.10, 0.035)
     roughness_rms_m: float = 0.008
     roughness_corr_m: tuple[float, float] = (0.15, 0.12)
 
 
 @dataclass(frozen=True)
-class Pipe:
-    """Hollow cylinder parallel to y, extending across the entire y-domain."""
-
-    x_m: float
-    z_m: float
-    outer_radius_m: float
-    wall_m: float
-    wall_epsilon_r: float = 3.0
-    wall_sigma_s_m: float = 1e-5
-    fill_epsilon_r: float = 1.0
-    fill_sigma_s_m: float = 0.0
-
-
-@dataclass(frozen=True)
 class Config:
+    # Standalone demonstration grid; runtime scene configuration overrides it.
     shape: tuple[int, int, int] = (200, 1, 150)
     spacing_m: tuple[float, float, float] = (0.005, 0.005, 0.005)
     surface_z_m: float = 0.6
     surface_roughness_rms_m: float = 0.000
-    water_epsilon_r: float = 80.0  # approximate, nondispersive
+    water_epsilon_r: float = WATER_EPSILON_R  # approximate, nondispersive
     seed: int = 17
     bins_epsilon: int = 5
     bins_log_sigma: int = 5
@@ -77,7 +67,7 @@ class Fields:
     sigma_s_m: np.ndarray
     porosity: np.ndarray
     saturation: np.ndarray
-    layer_id: np.ndarray  # 0=air, 1..N=soil, N+1=pipe wall, N+2=fill
+    layer_id: np.ndarray  # 0=air, 1..N=soil
     config: Config
     layer_names: tuple[str, ...]
 
@@ -89,7 +79,7 @@ class Fields:
                          where=self.sigma_s_m > 0)
 
 
-def _check(layers: tuple[Layer, ...], cfg: Config, pipe: Pipe | None) -> None:
+def _check(layers: tuple[Layer, ...], cfg: Config) -> None:
     if not layers:
         raise ValueError("At least one soil layer is required")
     if len(cfg.shape) != 3 or len(cfg.spacing_m) != 3 or any(n < 1 for n in cfg.shape):
@@ -115,10 +105,6 @@ def _check(layers: tuple[Layer, ...], cfg: Config, pipe: Pipe | None) -> None:
                 or any(c <= 0 for c in l.correlation_m + l.roughness_corr_m)
                 or l.roughness_rms_m < 0):
             raise ValueError(f"Invalid layer parameters for {l.name}")
-    if pipe and (pipe.outer_radius_m <= 0 or not 0 < pipe.wall_m < pipe.outer_radius_m
-                 or pipe.wall_epsilon_r < 1 or pipe.fill_epsilon_r < 1
-                 or pipe.wall_sigma_s_m < 0 or pipe.fill_sigma_s_m < 0):
-        raise ValueError("Invalid pipe parameters")
 
 
 def correlated_field(shape: tuple[int, ...], spacing: tuple[float, ...],
@@ -136,6 +122,7 @@ def correlated_field(shape: tuple[int, ...], spacing: tuple[float, ...],
     active = [i for i, n in enumerate(shape) if n > 1]
     if not active:
         return np.zeros(shape, dtype=np.float32)
+    # Double padding reduces periodic wrap; chosen numerical treatment, not geology.
     padded = tuple(2 * n if n > 1 else 1 for n in shape)
     if np.prod(padded, dtype=np.int64) > max_fft_cells:
         raise ValueError("FFT field too large; increase max_fft_cells or tile the model")
@@ -145,6 +132,7 @@ def correlated_field(shape: tuple[int, ...], spacing: tuple[float, ...],
         view = [1] * len(shape)
         view[axis] = len(k)
         spectrum_arg += (2 * np.pi * correlation[axis] * k.reshape(view)) ** 2
+    # Matérn spectral shape in d active dimensions; amplitude is sqrt(PSD).
     psd_sqrt = spectrum_arg ** (-(smoothness + len(active) / 2) / 2)
     noise = rng.standard_normal(padded)
     field = np.fft.ifftn(np.fft.fftn(noise) * psd_sqrt).real
@@ -155,23 +143,22 @@ def correlated_field(shape: tuple[int, ...], spacing: tuple[float, ...],
             else np.zeros(shape)).astype(np.float32)
 
 
-def generate(layers: tuple[Layer, ...], cfg: Config = Config(),
-             pipe: Pipe | None = None) -> Fields:
+def generate(layers: tuple[Layer, ...], cfg: Config = Config()) -> Fields:
     """Generate one fixed 3D realization of εr, σ, ρ, porosity and saturation.
 
     Layers have independent multiscale random fields. Within a layer, shared
     latent fields couple porosity, moisture and pore-water conductivity.
     """
-    _check(layers, cfg, pipe)
+    _check(layers, cfg)
     rng = np.random.default_rng(cfg.seed)
     nx, ny, nz = cfg.shape
     dx, dy, dz = cfg.spacing_m
     xy_shape, xy_spacing = (nx, ny), (dx, dy)
-    surface_noise = correlated_field(xy_shape, xy_spacing, (0.16, 0.16), rng,
+    surface_noise = correlated_field(xy_shape, xy_spacing, SURFACE_CORRELATION_M, rng,
                                      cfg.max_fft_cells)
     surface_z = cfg.surface_z_m + np.clip(cfg.surface_roughness_rms_m * surface_noise,
-                                         -3 * cfg.surface_roughness_rms_m,
-                                         3 * cfg.surface_roughness_rms_m)
+                                         -ROUGHNESS_CLIP_SD * cfg.surface_roughness_rms_m,
+                                         ROUGHNESS_CLIP_SD * cfg.surface_roughness_rms_m)
     z = (np.arange(nz, dtype=np.float32) + 0.5) * dz
     depth = surface_z[:, :, None] - z[None, None, :]
     epsilon = np.ones(cfg.shape, dtype=np.float32)
@@ -188,7 +175,7 @@ def generate(layers: tuple[Layer, ...], cfg: Config = Config(),
             rough = correlated_field(xy_shape, xy_spacing, layer.roughness_corr_m,
                                      rng, cfg.max_fft_cells) * layer.roughness_rms_m
             # Keep all layer boundaries ordered, even for unusual random seeds.
-            limit = 0.22 * min(layer.thickness_m, layers[i + 1].thickness_m)
+            limit = INTERFACE_THICKNESS_FRACTION * min(layer.thickness_m, layers[i + 1].thickness_m)
             upper = lower + layer.thickness_m + np.clip(rough, -limit, limit)
             mask = (depth >= lower[:, :, None]) & (depth < upper[:, :, None])
             lower = upper
@@ -197,14 +184,15 @@ def generate(layers: tuple[Layer, ...], cfg: Config = Config(),
         shared = correlated_field(cfg.shape, cfg.spacing_m, layer.correlation_m,
                                   rng, cfg.max_fft_cells)
         local = correlated_field(cfg.shape, cfg.spacing_m,
-                                 tuple(max(2 * d, c * 0.45)
+                                 tuple(max(2 * d, c * LOCAL_CORRELATION_RATIO)
                                        for d, c in zip(cfg.spacing_m, layer.correlation_m)),
                                  rng, cfg.max_fft_cells)
+        # Coupling weights and clips are declared priors in physical_constants.py.
         p = np.clip(layer.porosity + layer.porosity_sd *
-                    (0.75 * shared + 0.66 * local), 0.03, 0.8)
+                    (POROSITY_MIX[0] * shared + POROSITY_MIX[1] * local), *POROSITY_LIMITS)
         sw = np.clip(layer.saturation + layer.saturation_sd *
-                     (0.85 * shared - 0.53 * local), 0.001, 1.0)
-        pore_sigma = layer.water_conductivity_s_m * np.exp(0.15 * shared)
+                     (SATURATION_MIX[0] * shared + SATURATION_MIX[1] * local), *SATURATION_LIMITS)
+        pore_sigma = layer.water_conductivity_s_m * np.exp(PORE_CONDUCTIVITY_LOG_SD * shared)
         root_epsilon = ((1 - p) * np.sqrt(layer.grain_permittivity)
                         + p * sw * np.sqrt(cfg.water_epsilon_r) + p * (1 - sw))
         eps_l = root_epsilon ** 2  # CRIM, low-loss approximation
@@ -216,29 +204,13 @@ def generate(layers: tuple[Layer, ...], cfg: Config = Config(),
         saturation[mask] = sw[mask]
         layer_id[mask] = i + 1
 
-    if pipe:
-        x = (np.arange(nx, dtype=np.float32) + 0.5) * dx
-        r2 = ((x[:, None, None] - pipe.x_m) ** 2
-              + (z[None, None, :] - pipe.z_m) ** 2)
-        outer = np.broadcast_to(r2 <= pipe.outer_radius_m ** 2, cfg.shape)
-        inner = np.broadcast_to(r2 < (pipe.outer_radius_m - pipe.wall_m) ** 2,
-                                cfg.shape)
-        if np.any(outer & (depth < 0)):
-            raise ValueError("Pipe crosses the air/soil interface")
-        if not np.any(outer & (layer_id > 0)):
-            raise ValueError("Pipe lies outside the soil")
-        epsilon[outer], sigma[outer] = pipe.wall_epsilon_r, pipe.wall_sigma_s_m
-        epsilon[inner], sigma[inner] = pipe.fill_epsilon_r, pipe.fill_sigma_s_m
-        layer_id[outer] = len(layers) + 1
-        layer_id[inner] = len(layers) + 2
-        porosity[outer], saturation[outer] = np.nan, np.nan
     return Fields(epsilon, sigma, porosity, saturation, layer_id, cfg,
-                  ("air",) + tuple(l.name for l in layers)
-                  + (("pipe_wall", "pipe_fill") if pipe else ()))
+                  ("air",) + tuple(l.name for l in layers))
 
 
 def material_palette(fields: Fields) -> tuple[np.ndarray, list[str], dict]:
     """Quantize ε and log(σ) within each layer into occupied 2D quantile bins."""
+    # Quantile material bins limit solver material count; not intrinsic soil classes.
     ids = np.empty(fields.config.shape, dtype=np.int16)
     keys: list[str] = []
     materials: dict = {}

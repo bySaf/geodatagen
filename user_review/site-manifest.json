@@ -1,0 +1,29 @@
+{
+  "source": "docs/SUMMARY.md",
+  "files": [
+    "index.html",
+    "usage/quickstart.html",
+    "usage/scene.html",
+    "usage/trajectory.html",
+    "usage/exports.html",
+    "usage/performance.html",
+    "theory/model.html",
+    "theory/parameters.html",
+    "theory/papers.html",
+    "examples/scenes.html",
+    "examples/scans.html",
+    "usage/documentation.html",
+    "assets/ATTRIBUTION.txt",
+    "assets/GPL-3.0.txt",
+    "assets/benchmark.json",
+    "assets/book.css",
+    "assets/book.js",
+    "assets/bscan-comparison.png",
+    "assets/full-scenes.png",
+    "assets/pilot-route.png",
+    "assets/real-hyperbola.png",
+    "assets/scene-routes.png",
+    "assets/soil-models.png",
+    "assets/synthetic-hyperbolas.png"
+  ]
+}
