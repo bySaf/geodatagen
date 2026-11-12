@@ -22,11 +22,25 @@ macOS arm64/x86_64 and Linux x86_64. ParaView is a separate optional application
 EOF
 }
 
+check_python_version() {
+  "$1" - <<'PY'
+import sys
+if sys.version_info[:2] not in ((3, 12), (3, 13)):
+    raise SystemExit(
+        f'GeoDataGen requires Python 3.12 or 3.13; selected {sys.version.split()[0]}.\n'
+        f'Interpreter: {sys.executable}\n'
+        'Create a new virtual environment using Python 3.12, then select its bin/python in PyCharm.\n'
+        'Installing or downgrading contourpy does not fix an incompatible interpreter.\n'
+        'The existing environment has not been changed.')
+PY
+}
+
 check_environment() {
   if [[ ! -x .venv/bin/python ]]; then
     echo 'Environment not found. Run: bash scripts/setup.sh' >&2
     return 1
   fi
+  check_python_version .venv/bin/python
   .venv/bin/python - <<'PY'
 import importlib.metadata as m
 import sys
@@ -71,7 +85,7 @@ else
     exit 1
   fi
 fi
-"$PYTHON_BIN" -c 'import sys; raise SystemExit(0 if sys.version_info[:2] in [(3,12),(3,13)] else "Use Python 3.12 or 3.13; existing .venv is not changed.")'
+check_python_version "$PYTHON_BIN"
 if [[ ! -x .venv/bin/python ]]; then "$PYTHON_BIN" -m venv .venv; fi
 
 echo 'Installing pinned CPU dependencies in .venv…'

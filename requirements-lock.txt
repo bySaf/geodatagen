@@ -1,3 +1,4 @@
+# Requires Python 3.12 or 3.13 (Python 3.9 is incompatible).
 # CPU runtime only, captured from the validated Python 3.12 environment.
 # New experiments need no notebook, GUI or GPU packages.
 colorama==0.4.6

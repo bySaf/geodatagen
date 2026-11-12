@@ -22,7 +22,20 @@ python geodatagen.py docs
 
 Последняя команда открывает локальную документацию. Её можно открыть и без Python: `user_review/index.html`. Интернет для просмотра скачанной документации не нужен.
 
-Для PyCharm откройте **корень `geodatagen`** и выберите интерпретатор `.venv/bin/python`. Встроенный терминал должен находиться в корне проекта. При повторном открытии терминала достаточно `source .venv/bin/activate`.
+### Интерпретатор PyCharm
+
+Откройте **корень `geodatagen`**. После установки окружения:
+
+1. Откройте Settings (`⌘,` на macOS) → **Project Structure**. В других версиях нужная страница называется **Python Interpreter**; её можно найти поиском настроек.
+2. В списке Interpreter выберите **Add Interpreter → Add Local Interpreter**.
+3. Выберите существующий Python / **Existing environment** и укажите `<папка проекта>/.venv/bin/python`.
+4. Примените настройки. Версия выбранного интерпретатора должна быть **3.12 или 3.13**.
+
+Если окружение ещё не создано, сначала выберите Python 3.12 как базовый интерпретатор нового Virtualenv. Системный `/usr/bin/python3` на macOS может оказаться Python 3.9 — он не подходит. [Инструкция JetBrains](https://www.jetbrains.com/help/pycharm/configuring-python-interpreter.html).
+
+Ошибка `No matching distribution found for contourpy==1.4.0` с сообщением `Requires-Python >=3.12` означает несовместимую версию Python. Проверка в терминале: `python --version` и `python -c "import sys; print(sys.executable)"`. Устанавливать пакеты следует в выбранное окружение, а не понижать версии зависимостей.
+
+Встроенный терминал должен находиться в корне проекта. После смены интерпретатора откройте новую вкладку Terminal и выполните `source .venv/bin/activate`.
 
 ### Первый короткий расчёт
 

@@ -1,2 +1,3 @@
+# Requires Python 3.12 or 3.13; select that interpreter before installing.
 # The same CPU runtime is used by setup.sh and manual installation.
 -r requirements-lock.txt
