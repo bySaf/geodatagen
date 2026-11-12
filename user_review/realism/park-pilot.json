@@ -1,0 +1,179 @@
+{
+  "seed": 20261112,
+  "grid": {
+    "domain": [
+      2.4,
+      1.2,
+      1.2
+    ],
+    "dx": 0.02,
+    "solver_dx": 0.01,
+    "surface_z": 0.8,
+    "time_window": 3.2e-08,
+    "threads": 2,
+    "pml_thickness": 0.12,
+    "frequency": 600000000.0
+  },
+  "preset": {
+    "name": "park",
+    "layers": [
+      {
+        "thickness": 0.1,
+        "sand": 0.4,
+        "clay": 0.18,
+        "bulk_density": 1.25,
+        "water_min": 0.12,
+        "water_max": 0.18,
+        "materials": 20,
+        "custom": {
+          "water_conductivity_s_m": 0.12,
+          "porosity_sd": 0.01,
+          "grain_permittivity": 4.5,
+          "archie_a": 1.0,
+          "archie_m": 1.5,
+          "archie_n": 2.0,
+          "surface_conductivity_s_m": 0.0005,
+          "correlation_m": [
+            0.25,
+            0.25,
+            0.06
+          ],
+          "roughness_rms_m": 0.02,
+          "roughness_corr_m": [
+            0.4,
+            0.4
+          ]
+        }
+      },
+      {
+        "thickness": 0.12,
+        "sand": 0.4,
+        "clay": 0.18,
+        "bulk_density": 1.45,
+        "water_min": 0.13,
+        "water_max": 0.21,
+        "materials": 20,
+        "custom": {
+          "water_conductivity_s_m": 0.12,
+          "porosity_sd": 0.01,
+          "grain_permittivity": 4.5,
+          "archie_a": 1.0,
+          "archie_m": 1.5,
+          "archie_n": 2.0,
+          "surface_conductivity_s_m": 0.0005,
+          "correlation_m": [
+            0.25,
+            0.25,
+            0.06
+          ],
+          "roughness_rms_m": 0.02,
+          "roughness_corr_m": [
+            0.4,
+            0.4
+          ]
+        }
+      },
+      {
+        "thickness": 0.38,
+        "sand": 0.4,
+        "clay": 0.18,
+        "bulk_density": 1.55,
+        "water_min": 0.15,
+        "water_max": 0.23,
+        "materials": 20,
+        "custom": {
+          "water_conductivity_s_m": 0.12,
+          "porosity_sd": 0.01,
+          "grain_permittivity": 4.5,
+          "archie_a": 1.0,
+          "archie_m": 1.5,
+          "archie_n": 2.0,
+          "surface_conductivity_s_m": 0.0005,
+          "correlation_m": [
+            0.25,
+            0.25,
+            0.06
+          ],
+          "roughness_rms_m": 0.02,
+          "roughness_corr_m": [
+            0.4,
+            0.4
+          ]
+        }
+      },
+      {
+        "thickness": 0.2,
+        "sand": 0.4,
+        "clay": 0.18,
+        "bulk_density": 1.6,
+        "water_min": 0.16,
+        "water_max": 0.24,
+        "materials": 20,
+        "custom": {
+          "water_conductivity_s_m": 0.12,
+          "porosity_sd": 0.01,
+          "grain_permittivity": 4.5,
+          "archie_a": 1.0,
+          "archie_m": 1.5,
+          "archie_n": 2.0,
+          "surface_conductivity_s_m": 0.0005,
+          "correlation_m": [
+            0.25,
+            0.25,
+            0.06
+          ],
+          "roughness_rms_m": 0.02,
+          "roughness_corr_m": [
+            0.4,
+            0.4
+          ]
+        }
+      }
+    ],
+    "custom_field": {
+      "bins_epsilon": 8,
+      "bins_log_sigma": 6,
+      "water_epsilon_r": 80.0,
+      "max_fft_cells": 50000000
+    }
+  },
+  "source": {
+    "waveform": "gaussiandotnorm",
+    "frequency_hz": 600000000.0,
+    "moment_Am": 0.02,
+    "height_m": 0.02,
+    "tx_rx_offset_m": 0.1
+  },
+  "profile": {
+    "x_start_m": 0.5,
+    "x_end_m": 1.9,
+    "step_m": 0.05,
+    "y_m": 0.6
+  },
+  "target": {
+    "center_m": [
+      1.2,
+      0.6,
+      0.45
+    ],
+    "radius_m": 0.06
+  },
+  "sfcw": {
+    "fmin_hz": 400000000.0,
+    "fmax_hz": 900000000.0,
+    "df_hz": 5000000.0
+  },
+  "assumptions": {
+    "scenario": "Illustrative mineral park lawn, not reconstruction of a surveyed park",
+    "horizon_depths_m": [
+      0,
+      0.1,
+      0.22,
+      0.6,
+      0.8
+    ],
+    "bulk_density_and_moisture": "Declared synthetic priors, not measured values from the cited campus pedon",
+    "spatial_scales": "Engineering priors, not fitted covariance ranges",
+    "real_reference": "Different real SFCW instrument and concrete target, qualitative comparison only"
+  }
+}

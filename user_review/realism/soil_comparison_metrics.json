@@ -1,0 +1,186 @@
+[
+  {
+    "mode": "native_peplinski",
+    "layers": [
+      {
+        "layer": 0,
+        "z_bottom_m": 0.7000000000000001,
+        "z_top_m": 0.8,
+        "soil_voxels": 36000,
+        "excluded_object_voxels": 0,
+        "theta_mean": 0.15122716666666666,
+        "theta_std": 0.0068996783962893635,
+        "theta_min": 0.1215,
+        "theta_max": 0.1785,
+        "theta_bin_reconstruction_error": 2.7755575615628914e-17,
+        "lag1_xyz": [
+          0.5583374321705589,
+          0.5504282958811504,
+          0.47058159982463116
+        ],
+        "shuffled_correlation": -0.0030655667474933403,
+        "correlation_exceeds_shuffled": true,
+        "finite": true,
+        "nonconstant": true
+      },
+      {
+        "layer": 1,
+        "z_bottom_m": 0.58,
+        "z_top_m": 0.7000000000000001,
+        "soil_voxels": 43200,
+        "excluded_object_voxels": 0,
+        "theta_mean": 0.16921925925925924,
+        "theta_std": 0.012574727719878508,
+        "theta_min": 0.132,
+        "theta_max": 0.208,
+        "theta_bin_reconstruction_error": 2.7755575615628914e-17,
+        "lag1_xyz": [
+          0.919322560588486,
+          0.9202070693511829,
+          0.9272365760076555
+        ],
+        "shuffled_correlation": 0.001380068686376174,
+        "correlation_exceeds_shuffled": true,
+        "finite": true,
+        "nonconstant": true
+      },
+      {
+        "layer": 2,
+        "z_bottom_m": 0.2,
+        "z_top_m": 0.58,
+        "soil_voxels": 136664,
+        "excluded_object_voxels": 136,
+        "theta_mean": 0.1916526371246268,
+        "theta_std": 0.008333401134684018,
+        "theta_min": 0.152,
+        "theta_max": 0.22800000000000004,
+        "theta_bin_reconstruction_error": 2.7755575615628914e-17,
+        "lag1_xyz": [
+          0.6950522545839438,
+          0.6936128087197815,
+          0.6874686188307098
+        ],
+        "shuffled_correlation": -0.0032412759902566506,
+        "correlation_exceeds_shuffled": true,
+        "finite": true,
+        "nonconstant": true
+      },
+      {
+        "layer": 3,
+        "z_bottom_m": 0,
+        "z_top_m": 0.2,
+        "soil_voxels": 72000,
+        "excluded_object_voxels": 0,
+        "theta_mean": 0.19739994444444442,
+        "theta_std": 0.01225382207935422,
+        "theta_min": 0.162,
+        "theta_max": 0.238,
+        "theta_bin_reconstruction_error": 2.7755575615628914e-17,
+        "lag1_xyz": [
+          0.9412952312391661,
+          0.9434252033803123,
+          0.9444492111591689
+        ],
+        "shuffled_correlation": -0.001357549724024693,
+        "correlation_exceeds_shuffled": true,
+        "finite": true,
+        "nonconstant": true
+      }
+    ],
+    "section_y_m": 0.61
+  },
+  {
+    "mode": "custom_crim_archie",
+    "layers": [
+      {
+        "layer": 0,
+        "z_bottom_m": 0.7000000000000001,
+        "z_top_m": 0.8,
+        "soil_voxels": 36105,
+        "theta_mean": 0.1413503736257553,
+        "theta_std": 0.014887461438775063,
+        "theta_min": 0.09717346727848053,
+        "theta_max": 0.19769573211669922,
+        "lag1_xyz": [
+          0.9830149172256442,
+          0.9839305007620989,
+          0.8393004647032403
+        ],
+        "shuffled_correlation": 0.005184711384655714,
+        "correlation_exceeds_shuffled": true,
+        "finite": true,
+        "nonconstant": true,
+        "moisture_source": "continuous generated porosity*saturation, object voxels excluded",
+        "layer_bounds": "nominal; actual mask follows rough interface",
+        "material_model": "nondispersive CRIM/Archie, quantized for FDTD"
+      },
+      {
+        "layer": 1,
+        "z_bottom_m": 0.58,
+        "z_top_m": 0.7000000000000001,
+        "soil_voxels": 42720,
+        "theta_mean": 0.17548900842666626,
+        "theta_std": 0.024133535102009773,
+        "theta_min": 0.09683264046907425,
+        "theta_max": 0.257274866104126,
+        "lag1_xyz": [
+          0.9870179462619562,
+          0.98698369901316,
+          0.8534117885159734
+        ],
+        "shuffled_correlation": 0.006179681988580754,
+        "correlation_exceeds_shuffled": true,
+        "finite": true,
+        "nonconstant": true,
+        "moisture_source": "continuous generated porosity*saturation, object voxels excluded",
+        "layer_bounds": "nominal; actual mask follows rough interface",
+        "material_model": "nondispersive CRIM/Archie, quantized for FDTD"
+      },
+      {
+        "layer": 2,
+        "z_bottom_m": 0.2,
+        "z_top_m": 0.58,
+        "soil_voxels": 136696,
+        "theta_mean": 0.1893472522497177,
+        "theta_std": 0.021842001006007195,
+        "theta_min": 0.11513403803110123,
+        "theta_max": 0.26715919375419617,
+        "lag1_xyz": [
+          0.9858859759143134,
+          0.9851471258519446,
+          0.8687633607303278
+        ],
+        "shuffled_correlation": 0.0014063578008499007,
+        "correlation_exceeds_shuffled": true,
+        "finite": true,
+        "nonconstant": true,
+        "moisture_source": "continuous generated porosity*saturation, object voxels excluded",
+        "layer_bounds": "nominal; actual mask follows rough interface",
+        "material_model": "nondispersive CRIM/Archie, quantized for FDTD"
+      },
+      {
+        "layer": 3,
+        "z_bottom_m": 0,
+        "z_top_m": 0.2,
+        "soil_voxels": 72343,
+        "theta_mean": 0.19226177036762238,
+        "theta_std": 0.0247757900506258,
+        "theta_min": 0.11314933747053146,
+        "theta_max": 0.29846009612083435,
+        "lag1_xyz": [
+          0.9885305107861875,
+          0.9887392860907391,
+          0.8895436527231332
+        ],
+        "shuffled_correlation": 0.00265584616343748,
+        "correlation_exceeds_shuffled": true,
+        "finite": true,
+        "nonconstant": true,
+        "moisture_source": "continuous generated porosity*saturation, object voxels excluded",
+        "layer_bounds": "nominal; actual mask follows rough interface",
+        "material_model": "nondispersive CRIM/Archie, quantized for FDTD"
+      }
+    ],
+    "section_y_m": 0.61
+  }
+]

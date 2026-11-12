@@ -1,0 +1,7 @@
+# Object generation rules. All lengths in metres; depths refer to centres.
+# type               count_min count_max radius_min radius_max depth_min depth_max
+metal_sphere         1         2         0.06       0.10       0.40      0.52
+air_sphere           1         2         0.06       0.10       0.40      0.52
+dielectric_sphere    1         2         0.06       0.10       0.40      0.52
+# The control scene overrides every count to zero. The dielectric inclusion
+# material is specified by the simulation configuration, not by this file.

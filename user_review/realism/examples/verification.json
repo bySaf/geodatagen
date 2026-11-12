@@ -1,0 +1,22 @@
+{
+  "unit_tests": 5,
+  "actual_fdtd_traces": 1,
+  "actual_fdtd_seconds": 31.451653249998344,
+  "smoke_data": "data/experiment-cli-smoke-v2",
+  "geometry_modes": [
+    "native_peplinski",
+    "custom_crim_archie"
+  ],
+  "object_centres_match_requested_materials": true,
+  "local_stop_prevented_second_trace": true,
+  "original_pilot_and_six_raw_hdf5_unchanged": true,
+  "original_sha256": {
+    "tools/run_realism_pilot.py": "c9feeef91c88cdbceb4f922d0f1b01a3d929ce5a5fc176f892c6769bfb066ed8",
+    "user_review/realism/pilot/native_peplinski/bscan.h5": "78a762afeb3a195ec908de37f64765e00b33ce2cd25c2ab49836387df3a9d8da",
+    "user_review/realism/pilot/custom_crim_archie/bscan.h5": "a95036e5c0437e75f92a8e5199f8b17a26209743cf5b594065746783eb95d193",
+    "user_review/realism/pilot/native_peplinski/pml_center/bscan.h5": "8530fcba59b6b1ee8ae99070a029b250fcd67a85a564bba51e1f9c884f9e8947",
+    "user_review/realism/pilot/native_peplinski/background_center/bscan.h5": "765ff6e74253296228bb74acacf1941abea2e4a27220857046e2d282461dbf54",
+    "user_review/realism/pilot/custom_crim_archie/pml_center/bscan.h5": "635826a15bc891496d18f6edaea9a2f80bbe5db450a5ef6cdb42e4d8ca04dac6",
+    "user_review/realism/pilot/custom_crim_archie/background_center/bscan.h5": "6dad296871437db636955d545b55a6f1c76fd17913bace13184f74cda1c2a6b2"
+  }
+}

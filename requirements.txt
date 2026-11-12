@@ -1,0 +1,2 @@
+# The same CPU runtime is used by setup.sh and manual installation.
+-r requirements-lock.txt

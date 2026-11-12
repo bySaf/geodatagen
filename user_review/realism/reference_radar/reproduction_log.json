@@ -1,0 +1,75 @@
+{
+  "concrete_profiles": [
+    {
+      "specimen": "I",
+      "file": "raw/SFCW/Allariz Specimen I 0.5cm001_20230615_125508/Allariz slab2 0.5cm001_20230615_125508_20240226_110113.sgy",
+      "sha256": "380d441bed8843af586155aeb31dcbdea37565d3a9412020e475117e9f671637",
+      "trace_count": 252,
+      "time_samples": 655,
+      "sampling_rate_hz": 40960000000.0,
+      "dt_s": 2.44140625e-11,
+      "nominal_trace_spacing_m": 0.005,
+      "inferred_last_x_m": 1.2550000000000001,
+      "spectrum_peak_hz": 1938564885.4961834,
+      "background_subtracted_energy_fraction_400_900MHz": 0.0003468013019300997,
+      "position_note": "SEG-Y coordinates are zero; x is inferred from nominal 2 scans/cm. All traces retained.",
+      "count_note": "CSV reports 1.25 m (I), 1.85 m (II/III); inferred endpoints I/II exceed these by 5 mm.",
+      "sample_note": "Actual export:655 samples. Article reportedly states653; actual export retained.",
+      "time_zero_note": "Time0 is the first exported sample, not a calibrated surface/reflection zero. No shift or depth conversion was applied."
+    },
+    {
+      "specimen": "II",
+      "file": "raw/SFCW/Allariz Specimen II 0.5cm001_20230615_122603/Allariz slab1 0.5cm001_20230615_122603_20240226_110113.sgy",
+      "sha256": "b8be473e1fa3e4dae68af5847de7a10cb28fc8d42f997ccbfd754d7fd1ab92fe",
+      "trace_count": 372,
+      "time_samples": 655,
+      "sampling_rate_hz": 40960000000.0,
+      "dt_s": 2.44140625e-11,
+      "nominal_trace_spacing_m": 0.005,
+      "inferred_last_x_m": 1.855,
+      "spectrum_peak_hz": 1563358778.6259544,
+      "background_subtracted_energy_fraction_400_900MHz": 0.0006539471796713769,
+      "position_note": "SEG-Y coordinates are zero; x is inferred from nominal 2 scans/cm. All traces retained.",
+      "count_note": "CSV reports 1.25 m (I), 1.85 m (II/III); inferred endpoints I/II exceed these by 5 mm.",
+      "sample_note": "Actual export:655 samples. Article reportedly states653; actual export retained.",
+      "time_zero_note": "Time0 is the first exported sample, not a calibrated surface/reflection zero. No shift or depth conversion was applied."
+    },
+    {
+      "specimen": "III",
+      "file": "raw/SFCW/Allariz Specimen III 0.5cm001_20230615_124254/Allariz slab3 0.5cm001_20230615_124254_20240226_110113.sgy",
+      "sha256": "c5e32eefc591c1264a4bfb3327923f24f46ff483710235d6319b01f7497cd01e",
+      "trace_count": 371,
+      "time_samples": 655,
+      "sampling_rate_hz": 40960000000.0,
+      "dt_s": 2.44140625e-11,
+      "nominal_trace_spacing_m": 0.005,
+      "inferred_last_x_m": 1.85,
+      "spectrum_peak_hz": 1625893129.7709925,
+      "background_subtracted_energy_fraction_400_900MHz": 0.00020808276894968003,
+      "position_note": "SEG-Y coordinates are zero; x is inferred from nominal 2 scans/cm. All traces retained.",
+      "count_note": "CSV reports 1.25 m (I), 1.85 m (II/III); inferred endpoints I/II exceed these by 5 mm.",
+      "sample_note": "Actual export:655 samples. Article reportedly states653; actual export retained.",
+      "time_zero_note": "Time0 is the first exported sample, not a calibrated surface/reflection zero. No shift or depth conversion was applied."
+    }
+  ],
+  "soil": {
+    "rows": 3508,
+    "frequency_bins": 400,
+    "site_counts": {
+      "FWY14": 1784,
+      "FWY16": 1724
+    },
+    "finite_readings": true,
+    "sha256": "42fe50e669db89e77ed80b27b4f62a068f306f0b1a91ee87da8f189c43ce72de",
+    "original_radar_columns": [
+      "Time",
+      "DAC",
+      "Data",
+      "file_name"
+    ],
+    "limitation": "400 real-valued readings, no documented complex phase/IQ; not converted to time or depth.",
+    "license": "No explicit repository license found. Public data published by authors for research; do not assume a redistribution license.",
+    "preprocessing_note": "Repository has3508 samples; paper3472 after trimming upper/lower0.5% EMI tails; untrimmed published values retained.",
+    "frequency_axis_note": "Frequency-bin index authoritative; nominal linspace1.3–2.9GHz based on paper, not calibrated sweepvector."
+  }
+}

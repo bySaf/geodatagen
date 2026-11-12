@@ -1,0 +1,40 @@
+ОТКРЫТЬ ОТЧЁТ
+../index.html — первая главная страница: созвон, гайды и быстрый запуск.
+index.html — разрезы грунта и чёрно-белые B-сканы, включая реальную гиперболу.
+guide.html — отдельная пошаговая инструкция: грунт, объекты, координаты,
+подготовка, пробный расчёт, продолжение, остановка и просмотр.
+
+В ЗАКОНЧЕННОМ ПИЛОТЕ
+58 основных трасс (29 + 29) и 4 контрольных расчёта.
+Исходные HDF5 и сцены сохранены в pilot/<режим>/.
+standardized_comparison.npz — отдельная копия трёх профилей на общей
+сетке 5 см × 50 пс в окне 1.4 м × 16 нс. Сглаживание и прореживание
+описаны в validation_v2.json. Это единый формат просмотра,
+а не калибровка реального прибора и не замена исходных данных.
+
+КАК СДЕЛАТЬ НОВЫЙ ЭКСПЕРИМЕНТ
+Команды выполняются из корня установленного проекта georadar-start.
+Скопируй examples/park-objects.json, измени объекты/слои и выбери новую
+папку для результатов. Не меняй config.json внутри завершённого набора.
+
+.venv/bin/python tools/experiment.py prepare --config user_review/realism/examples/park-objects.json --data data/my-park --mode custom_crim_archie
+.venv/bin/python tools/experiment.py run --data data/my-park --limit 1
+.venv/bin/python tools/experiment.py status --data data/my-park
+.venv/bin/python tools/experiment.py run --data data/my-park
+.venv/bin/python tools/experiment.py plot --data data/my-park
+
+Штатный грунт: --mode native_peplinski на этапе prepare.
+Получаются scene_layout.png, bscan.png, ascan.png, scene/ и bscan.h5.
+Размещение нескольких сфер: objects=[{type,center_m,radius_m},...].
+Типы: metal, air, dielectric. Все размеры в метрах, Z направлена вверх.
+В примере поверхность z=0.8; глубина центра = 0.8 - z.
+Подробнее о форматах, ограничениях, случайных объектах и ParaView — guide.html.
+
+ПЕРЕСОБРАТЬ ТЕКУЩИЙ ОТЧЁТ ИЗ ГОТОВЫХ ДАННЫХ
+.venv/bin/python tools/validate_realism_v2.py
+.venv/bin/python tools/build_realism_review.py
+.venv/bin/python tools/package_realism_review.py
+
+Архив содержит отчёт, инструкцию, исходные данные пилота и реальные
+бетонные SFCW-измерения. Для запуска новых расчётов нужен установленный
+исходный проект с .venv, src и tools; ZIP не заменяет это окружение.

@@ -1,0 +1,191 @@
+{
+  "checker_sha256": "2b80e1a2009bf37d807039ec0938840fcffdd8c2a7e422be6a086283d9c98a85",
+  "frequency_hz": 600000000.0,
+  "epsilon_0_F_per_m": 8.8541878128e-12,
+  "material_statistics": {
+    "native_peplinski": {
+      "frequency_hz": 600000000.0,
+      "soil_voxels": 287864,
+      "geometry_sha256": "73fd9f3f61a2425d56fe3365b411449608bffb22de36ff12d9b8628ff5a05aa4",
+      "materials_sha256": "ac86b75a39b00ccd09075a65ead553625ae9e967894f25c80d30ec297d6da32f",
+      "epsilon_prime_voxel_weighted_mean": 11.89399618648997,
+      "sigma_base_voxel_weighted_mean_s_m": 0.04847188766028715,
+      "sigma_effective_voxel_weighted_mean_s_m": 0.05316391499041533,
+      "selection": "Occupied finite-conductivity materials with base epsilon_r>1; excludes air and PEC.",
+      "material_basis": "Actual quantized material palette assigned to frozen geometry."
+    },
+    "custom_crim_archie": {
+      "frequency_hz": 600000000.0,
+      "soil_voxels": 287864,
+      "geometry_sha256": "5a30ece57e2d9cc5faca873bb4ffe977eda20b9e8d194a85b41cd87a15ba7a51",
+      "materials_sha256": "124bfd6e3ed014d6e33a949a8c38a76f733fe467c0c414dbd43034b425069344",
+      "epsilon_prime_voxel_weighted_mean": 9.563482868495411,
+      "sigma_base_voxel_weighted_mean_s_m": 0.006886476311780151,
+      "sigma_effective_voxel_weighted_mean_s_m": 0.006886476311780151,
+      "selection": "Occupied finite-conductivity materials with base epsilon_r>1; excludes air and PEC.",
+      "material_basis": "Actual quantized material palette assigned to frozen geometry."
+    }
+  },
+  "moisture_validation": {
+    "source_sha256": "f4e889bc94b6dbde835c17bcf7d1d8f6cc9032f6b1a08e2ae560ff5400b25da5",
+    "retained_soil_voxels": 287864,
+    "checked_soil_voxels": 287864,
+    "nonfinite_retained_soil_voxels": 0,
+    "theta_negative_count": 0,
+    "theta_exceeds_porosity_count": 0,
+    "saturation_outside_0_1_count": 0,
+    "theta_equals_phi_times_s_max_abs_error": 0.0,
+    "comparison_tolerance": 1e-07,
+    "actual_theta": {
+      "min": 0.09683264046907425,
+      "mean": 0.18200313377059804,
+      "std": 0.027580419111882096,
+      "max": 0.29846009612083435
+    },
+    "actual_porosity": {
+      "min": 0.36300092935562134,
+      "mean": 0.432057765895595,
+      "std": 0.04165181914405554,
+      "max": 0.5626441240310669
+    },
+    "actual_saturation": {
+      "min": 0.1825518012046814,
+      "mean": 0.427361983448098,
+      "std": 0.08408411147292423,
+      "max": 0.7180248498916626
+    },
+    "layers": [
+      {
+        "layer": 0,
+        "soil_voxels": 36105,
+        "source_water_min": 0.12,
+        "source_water_max": 0.18,
+        "nominal_theta_midpoint": 0.15,
+        "nominal_uniform_range_sd": 0.017320508075688773,
+        "actual_theta": {
+          "min": 0.09717346727848053,
+          "mean": 0.14135037005884532,
+          "std": 0.014887460517837023,
+          "max": 0.19769573211669922
+        },
+        "actual_porosity": {
+          "min": 0.49818918108940125,
+          "mean": 0.5271902789503001,
+          "std": 0.009566271308415832,
+          "max": 0.5626441240310669
+        },
+        "actual_saturation": {
+          "min": 0.1825518012046814,
+          "mean": 0.26809971315381004,
+          "std": 0.027625176325271592,
+          "max": 0.36950191855430603
+        },
+        "voxels_outside_source_water_interval": 3170,
+        "theta_exceeds_porosity_count": 0
+      },
+      {
+        "layer": 1,
+        "soil_voxels": 42720,
+        "source_water_min": 0.13,
+        "source_water_max": 0.21,
+        "nominal_theta_midpoint": 0.16999999999999998,
+        "nominal_uniform_range_sd": 0.02309401076758503,
+        "actual_theta": {
+          "min": 0.09683264046907425,
+          "mean": 0.1754890090381301,
+          "std": 0.024133534508817497,
+          "max": 0.257274866104126
+        },
+        "actual_porosity": {
+          "min": 0.42069485783576965,
+          "mean": 0.45631950583992603,
+          "std": 0.011267495686221261,
+          "max": 0.4914463758468628
+        },
+        "actual_saturation": {
+          "min": 0.21706564724445343,
+          "mean": 0.3840865276984117,
+          "std": 0.048328017595692364,
+          "max": 0.552450954914093
+        },
+        "voxels_outside_source_water_interval": 4494,
+        "theta_exceeds_porosity_count": 0
+      },
+      {
+        "layer": 2,
+        "soil_voxels": 136696,
+        "source_water_min": 0.15,
+        "source_water_max": 0.23,
+        "nominal_theta_midpoint": 0.19,
+        "nominal_uniform_range_sd": 0.023094010767585035,
+        "actual_theta": {
+          "min": 0.11513403803110123,
+          "mean": 0.18934724911253362,
+          "std": 0.021842000517785384,
+          "max": 0.26715919375419617
+        },
+        "actual_porosity": {
+          "min": 0.3869919180870056,
+          "mean": 0.4185252047509658,
+          "std": 0.009372908682601917,
+          "max": 0.454236775636673
+        },
+        "actual_saturation": {
+          "min": 0.27756592631340027,
+          "mean": 0.4522441193004014,
+          "std": 0.049712644432491605,
+          "max": 0.6320146322250366
+        },
+        "voxels_outside_source_water_interval": 8587,
+        "theta_exceeds_porosity_count": 0
+      },
+      {
+        "layer": 3,
+        "soil_voxels": 72343,
+        "source_water_min": 0.16,
+        "source_water_max": 0.24,
+        "nominal_theta_midpoint": 0.2,
+        "nominal_uniform_range_sd": 0.02309401076758503,
+        "actual_theta": {
+          "min": 0.11314933747053146,
+          "mean": 0.192261766279654,
+          "std": 0.024775789556072975,
+          "max": 0.29846009612083435
+        },
+        "actual_porosity": {
+          "min": 0.36300092935562134,
+          "mean": 0.3958224157437392,
+          "std": 0.009658006429892996,
+          "max": 0.4325592815876007
+        },
+        "actual_saturation": {
+          "min": 0.2952139675617218,
+          "mean": 0.48538561111263223,
+          "std": 0.05832589828419696,
+          "max": 0.7180248498916626
+        },
+        "voxels_outside_source_water_interval": 7616,
+        "theta_exceeds_porosity_count": 0
+      }
+    ],
+    "field_basis": "Continuous generated theta=porosity*saturation; object/air cells excluded. FDTD uses the separately quantized epsilon/sigma palette."
+  },
+  "loss_definition": {
+    "epsilon_prime": "epsilon_inf + sum(delta_epsilon / (1 + (omega*tau)^2))",
+    "sigma_effective_s_m": "sigma_base + epsilon_0*omega*sum(delta_epsilon*omega*tau / (1 + (omega*tau)^2))",
+    "interpretation": "Effective conductivity includes Debye dielectric losses at the stated frequency. Base sigma alone is not total Peplinski loss. Neither conductivity alone equals propagation attenuation."
+  },
+  "water_parameter_semantics": {
+    "native_peplinski": "water_min/max are hard limits for the soil-moisture material palette; represented values are bin centers.",
+    "custom_crim_archie": "Bounds are converted to nominal midpoint and uniform-range SD, then to saturation mean/SD using nominal porosity. Gaussian correlated porosity and saturation fields yield theta=phi*S; this theta need not stay inside the source interval.",
+    "physical_clipping": "Generator clips porosity to[0.03,0.8] and saturation to[0.001,1]; thus0<=theta<=porosity.",
+    "realization_mean": "Nominal means are field-generation parameters, not enforced empirical means within each irregular layer mask. Porosity/saturation correlation also affects theta.",
+    "recommended_caption_ru": "Номинальные настройки и фактические статистики реализации: Peplinski использует жёсткий диапазон влажности; модель полей переводит этот диапазон в среднее и разброс."
+  },
+  "limitations": [
+    "Both material models are assumptions, not measurements of a particular park.",
+    "Compare epsilon_prime and sigma_effective at a common stated frequency and with voxel weighting.",
+    "Different loss laws and moisture distributions mean this is not an isolated comparison of spatial-field geometry."
+  ],
+  "inputs_read": "Frozen scene global.h5, global_materials.json, custom_fields.npz, soil.json only; no B-scan files opened."
+}

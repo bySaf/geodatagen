@@ -1,0 +1,293 @@
+{
+  "script_sha256": "78c6a9758be50d6c40f49b2dedc61e6dcf465e59250d73209f00b05428441430",
+  "scipy_version": "1.18.1",
+  "common_grid": {
+    "traces": 29,
+    "time_samples": 320,
+    "trace_step_m": 0.05,
+    "time_step_s": 5e-11,
+    "x_range_m": [
+      0,
+      1.4
+    ],
+    "time_range_ns": [
+      0,
+      15.95
+    ],
+    "time_interval_description": "[0,16 ns), half-open; last centre 15.95 ns; no extrapolated real sample at 16 ns"
+  },
+  "arrays": {
+    "native_raw": {
+      "shape_original": [
+        29,
+        1663
+      ],
+      "shape_output": [
+        29,
+        320
+      ],
+      "units": "V/m",
+      "spatial_operation": "None; original 5 cm positions retained, only common origin set to start of profile",
+      "temporal_operation": {
+        "source_dt_s": 1.925833201546444e-11,
+        "output_dt_s": 5.000000000000045e-11,
+        "polyphase_up": 753,
+        "polyphase_down": 1955,
+        "polyphase_dt_s": 5.0000051912659996e-11,
+        "final_alignment": "Linear interpolation onto exact 50 ps sample centres; no time-zero shift",
+        "interpolation_max_clock_adjustment_s": 1.656013839574508e-14
+      },
+      "contrast": {
+        "p99_before_background_removal": 48.47205477333623,
+        "p99_after_background_removal": 1.0153747322923963,
+        "p99_display_gain_when_renormalised": 47.73809435251713,
+        "energy_retained_fraction": 0.0007275431579455269,
+        "common_component_energy_fraction": 0.9992724568420545,
+        "orthogonal_energy_identity_relative_error": 0.0,
+        "protocol": "Per-trace DC removal, then profile-mean subtraction; all values on shared 29 x 320 display grid. No AGC, peak alignment, deconvolution or temporal band-pass."
+      },
+      "bandwidth": {
+        "residual_windowed_spectral_peak_hz": 999999999.9999999,
+        "residual_energy_fraction_400_900MHz": 0.5168856169323347,
+        "protocol": "Hann time window, sum spectrum energy over traces; rectangular frequency-bin accounting, not an applied band-pass."
+      }
+    },
+    "fields_raw": {
+      "shape_original": [
+        29,
+        1663
+      ],
+      "shape_output": [
+        29,
+        320
+      ],
+      "units": "V/m",
+      "spatial_operation": "None; original 5 cm positions retained, only common origin set to start of profile",
+      "temporal_operation": {
+        "source_dt_s": 1.925833201546444e-11,
+        "output_dt_s": 5.000000000000045e-11,
+        "polyphase_up": 753,
+        "polyphase_down": 1955,
+        "polyphase_dt_s": 5.0000051912659996e-11,
+        "final_alignment": "Linear interpolation onto exact 50 ps sample centres; no time-zero shift",
+        "interpolation_max_clock_adjustment_s": 1.656013839574508e-14
+      },
+      "contrast": {
+        "p99_before_background_removal": 54.51932474264638,
+        "p99_after_background_removal": 4.274250995108324,
+        "p99_display_gain_when_renormalised": 12.755293220973954,
+        "energy_retained_fraction": 0.010843073524403245,
+        "common_component_energy_fraction": 0.9891569264755967,
+        "orthogonal_energy_identity_relative_error": 0.0,
+        "protocol": "Per-trace DC removal, then profile-mean subtraction; all values on shared 29 x 320 display grid. No AGC, peak alignment, deconvolution or temporal band-pass."
+      },
+      "bandwidth": {
+        "residual_windowed_spectral_peak_hz": 874999999.9999999,
+        "residual_energy_fraction_400_900MHz": 0.41028661989953524,
+        "protocol": "Hann time window, sum spectrum energy over traces; rectangular frequency-bin accounting, not an applied band-pass."
+      }
+    },
+    "real_raw": {
+      "reference_specimen": "II",
+      "reference_doi": "10.5281/zenodo.10962520",
+      "shape_original": [
+        372,
+        655
+      ],
+      "shape_output": [
+        29,
+        320
+      ],
+      "units": "Instrument export units, not calibrated V/m",
+      "spatial_operation": {
+        "source_step_m": 0.0050000000000000044,
+        "output_step_m": 0.05,
+        "up": 1,
+        "down": 10,
+        "filter_before_crop": true,
+        "window": [
+          "kaiser",
+          8.6
+        ],
+        "padtype": "line",
+        "original_traces": 372,
+        "resampled_full_traces": 38,
+        "retained_first_traces": 29,
+        "original_residual_spatial_energy_above_new_nyquist_fraction": 0.4293567896970569,
+        "spatial_energy_protocol": "Remove mean across profile, Hann along original full X, sum spatial spectrum energy over time; new spatial Nyquist is 10 cycles/m."
+      },
+      "temporal_operation": {
+        "source_dt_s": 2.4414062500000025e-11,
+        "output_dt_s": 5.000000000000045e-11,
+        "polyphase_up": 125,
+        "polyphase_down": 256,
+        "polyphase_dt_s": 5.0000000000000054e-11,
+        "final_alignment": "Linear interpolation onto exact 50 ps sample centres; no time-zero shift",
+        "interpolation_max_clock_adjustment_s": 1.2575084015366692e-22
+      },
+      "contrast": {
+        "p99_before_background_removal": 0.013092826317452642,
+        "p99_after_background_removal": 0.004545138675127672,
+        "p99_display_gain_when_renormalised": 2.880621968500195,
+        "energy_retained_fraction": 0.14555529219501198,
+        "common_component_energy_fraction": 0.8544447078049878,
+        "orthogonal_energy_identity_relative_error": 1.2072763066855025e-16,
+        "protocol": "Per-trace DC removal, then profile-mean subtraction; all values on shared 29 x 320 display grid. No AGC, peak alignment, deconvolution or temporal band-pass."
+      },
+      "bandwidth": {
+        "residual_windowed_spectral_peak_hz": 1874999999.9999998,
+        "residual_energy_fraction_400_900MHz": 0.0033484889494660476,
+        "protocol": "Hann time window, sum spectrum energy over traces; rectangular frequency-bin accounting, not an applied band-pass."
+      }
+    }
+  },
+  "layer_contrast": {
+    "native_peplinski": {
+      "layers": [
+        {
+          "layer": 1,
+          "nominal_depth_top_m": 0,
+          "nominal_depth_bottom_m": 0.1,
+          "epsilon_mean": 9.181469037655335,
+          "epsilon_std": 0.39768273785745073,
+          "epsilon_min": 7.525363208111262,
+          "epsilon_max": 10.799117744140808,
+          "sigma_effective_mean_s_m": 0.04705003277216331,
+          "illustrative_interface_reflection_amplitude_abs": 0.5072419961217193,
+          "illustrative_interface_reflected_power_fraction": 0.25729444262954626,
+          "normal_ray_delay_to_bottom_from_ground_surface_ns": 2.0214610596696407,
+          "soil_voxels": 36000
+        },
+        {
+          "layer": 2,
+          "nominal_depth_top_m": 0.1,
+          "nominal_depth_bottom_m": 0.22,
+          "epsilon_mean": 10.757285328236875,
+          "epsilon_std": 0.7695695345778598,
+          "epsilon_min": 8.568774216007702,
+          "epsilon_max": 13.207132519458465,
+          "sigma_effective_mean_s_m": 0.05074235207747065,
+          "illustrative_interface_reflection_amplitude_abs": 0.039252518682378834,
+          "illustrative_interface_reflected_power_fraction": 0.0015407602229104995,
+          "normal_ray_delay_to_bottom_from_ground_surface_ns": 4.6471415838587085,
+          "soil_voxels": 43200
+        },
+        {
+          "layer": 3,
+          "nominal_depth_top_m": 0.22,
+          "nominal_depth_bottom_m": 0.6,
+          "epsilon_mean": 12.420311236346269,
+          "epsilon_std": 0.5357811634140858,
+          "epsilon_min": 9.966397964749886,
+          "epsilon_max": 14.833953967172423,
+          "sigma_effective_mean_s_m": 0.05455993164016055,
+          "illustrative_interface_reflection_amplitude_abs": 0.035676865610837084,
+          "illustrative_interface_reflected_power_fraction": 0.0012728387398137297,
+          "normal_ray_delay_to_bottom_from_ground_surface_ns": 13.581412730485038,
+          "soil_voxels": 136664
+        },
+        {
+          "layer": 4,
+          "nominal_depth_top_m": 0.6,
+          "nominal_depth_bottom_m": 0.8,
+          "epsilon_mean": 12.933281831781898,
+          "epsilon_std": 0.8042865832264221,
+          "epsilon_min": 10.693253768082684,
+          "epsilon_max": 15.672734928604228,
+          "sigma_effective_mean_s_m": 0.055023999133130636,
+          "illustrative_interface_reflection_amplitude_abs": 0.01003724527373009,
+          "illustrative_interface_reflected_power_fraction": 0.00010074629268501701,
+          "normal_ray_delay_to_bottom_from_ground_surface_ns": 18.379781912628385,
+          "soil_voxels": 72000
+        }
+      ],
+      "interface_model": "Normal incidence between homogeneous half-spaces formed from layer-average complex permittivity at 600 MHz; illustration of contrast only. No roughness, lateral variation, propagation loss, multiple reflections or antenna response.",
+      "travel_model": "Normal-ray phase-speed estimate using mean epsilon; not exact arrival time, no instrument/source delay, no dispersive group velocity. Bottom of model is not a measured reflector."
+    },
+    "custom_crim_archie": {
+      "layers": [
+        {
+          "layer": 1,
+          "nominal_depth_top_m": 0,
+          "nominal_depth_bottom_m": 0.1,
+          "epsilon_mean": 7.052487667167208,
+          "epsilon_std": 0.6041396761029022,
+          "epsilon_min": 6.054391742301976,
+          "epsilon_max": 8.130134475776572,
+          "sigma_effective_mean_s_m": 0.0036892894167443553,
+          "illustrative_interface_reflection_amplitude_abs": 0.4529426055815484,
+          "illustrative_interface_reflected_power_fraction": 0.20515700395100214,
+          "normal_ray_delay_to_bottom_from_ground_surface_ns": 1.7716603284141175,
+          "soil_voxels": 36105
+        },
+        {
+          "layer": 2,
+          "nominal_depth_top_m": 0.1,
+          "nominal_depth_bottom_m": 0.22,
+          "epsilon_mean": 9.056890121169305,
+          "epsilon_std": 1.0913843780865615,
+          "epsilon_min": 7.334320141429063,
+          "epsilon_max": 10.991652722149556,
+          "sigma_effective_mean_s_m": 0.006530132008696656,
+          "illustrative_interface_reflection_amplitude_abs": 0.06250002118012558,
+          "illustrative_interface_reflected_power_fraction": 0.003906252647516146,
+          "normal_ray_delay_to_bottom_from_ground_surface_ns": 4.1809004570377715,
+          "soil_voxels": 42720
+        },
+        {
+          "layer": 3,
+          "nominal_depth_top_m": 0.22,
+          "nominal_depth_bottom_m": 0.6,
+          "epsilon_mean": 9.99090043864461,
+          "epsilon_std": 1.05315008950231,
+          "epsilon_min": 8.269967221874094,
+          "epsilon_max": 11.808339131080254,
+          "sigma_effective_mean_s_m": 0.007479026191437844,
+          "illustrative_interface_reflection_amplitude_abs": 0.024537714426310933,
+          "illustrative_interface_reflected_power_fraction": 0.0006020994292671877,
+          "normal_ray_delay_to_bottom_from_ground_surface_ns": 12.193901604516379,
+          "soil_voxels": 136696
+        },
+        {
+          "layer": 4,
+          "nominal_depth_top_m": 0.6,
+          "nominal_depth_bottom_m": 0.8,
+          "epsilon_mean": 10.308196963025798,
+          "epsilon_std": 1.2071817013287174,
+          "epsilon_min": 8.550094487234407,
+          "epsilon_max": 12.677246162324533,
+          "sigma_effective_mean_s_m": 0.007572904343840009,
+          "illustrative_interface_reflection_amplitude_abs": 0.007814389055405248,
+          "illustrative_interface_reflected_power_fraction": 6.106467630923732e-05,
+          "normal_ray_delay_to_bottom_from_ground_surface_ns": 16.477715966268747,
+          "soil_voxels": 72343
+        }
+      ],
+      "interface_model": "Normal incidence between homogeneous half-spaces formed from layer-average complex permittivity at 600 MHz; illustration of contrast only. No roughness, lateral variation, propagation loss, multiple reflections or antenna response.",
+      "travel_model": "Normal-ray phase-speed estimate using mean epsilon; not exact arrival time, no instrument/source delay, no dispersive group velocity. Bottom of model is not a measured reflector."
+    }
+  },
+  "inputs_sha256": {
+    "user_review/realism/pilot/native_peplinski/bscan.h5": "78a762afeb3a195ec908de37f64765e00b33ce2cd25c2ab49836387df3a9d8da",
+    "user_review/realism/pilot/custom_crim_archie/bscan.h5": "a95036e5c0437e75f92a8e5199f8b17a26209743cf5b594065746783eb95d193",
+    "user_review/realism/reference_radar/concrete_specimen_II.npz": "b85fbe60fa0649282c83b7352c20aec5ccb7668b229e24b73721ff14ab4fd05e"
+  },
+  "npz_sha256": "b0a3122624a3ecbc8b4578b713a9df9624e70c16d9ea2debd1f2ceff22e7ea49",
+  "filter": {
+    "window": [
+      "kaiser",
+      8.6
+    ],
+    "padtype": "line",
+    "implementation": "scipy.signal.resample_poly: zero-phase low-pass polyphase FIR with delay compensation; default filter length from installed SciPy",
+    "documentation": "https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.resample_poly.html"
+  },
+  "limitations": [
+    "Shared sample spacing and plotting units do not make material, target depth, source or antenna response identical.",
+    "No peak alignment, time scaling, source deconvolution, temporal band-pass, AGC or independent trace normalisation was applied.",
+    "Both origins remain first exported sample. Real instrument latency is unknown; no conversion to depth.",
+    "Anti-alias filtering intentionally removes fine spatial detail from the real instrument. Keep its original-resolution image alongside.",
+    "Line padding is an explicit boundary assumption for the finite record; features at profile/time edges should not be used as validation targets.",
+    "Physical validation available now: object/no-object paired control, PML sensitivity, material/geometry integrity. Instrument similarity requires matched measured scene and calibration; no similarity percentage is produced."
+  ]
+}

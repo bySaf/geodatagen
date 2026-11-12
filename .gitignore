@@ -1,0 +1,40 @@
+# Local environments, caches and editor state
+.venv/
+.cache/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mpl/
+.idea/
+.vscode/
+.DS_Store
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+
+# New and historical calculation outputs (never pushed by accident)
+/experiments/
+/data/
+/dist/
+*.log
+*.zip
+*.pdf
+
+# Large local research downloads and generated pilot solver files
+/validation_real/
+/user_review/realism/reference_soil/
+/user_review/realism/reference_radar/_deps/
+/user_review/realism/reference_radar/raw/
+/user_review/realism/reference_radar/Radar_data_emi_data.pkl
+/user_review/realism/reference_radar/soil_golfcourse_*
+/user_review/realism/reference_hyperbola/candidates_concrete.png
+/user_review/realism/pilot/
+/user_review/paraview/
+/user_review/soil_modes/preview_geometry/
+/user_review/soil_modes/smoke/
+/user_review/**/run/
+
+# Compact licensed source archive used to reproduce the published reference
+!/user_review/realism/reference_radar/SFCW.zip
